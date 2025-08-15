@@ -1,5 +1,5 @@
 # *auto-generated*
-A template repository for building python packages. Please replace `$package` with the package's name in `metadata.yml`.
+A quant library.
 
 ## Installation
 ```sh
