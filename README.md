@@ -1,25 +1,25 @@
-# *auto-generated*
+# uquant
 A quant library.
 
 ## Installation
 ```sh
-*auto-generated*
+$ pip install uquant
 ```
 
 ## Requirements
 ```txt
-*auto-generated*
+
 ```
 
 ## See Also
 ### Github repository
-* *auto-generated*
+* https://github.com/Chitaoji/uquant/
 
 ### PyPI project
-* *auto-generated*
+* https://pypi.org/project/uquant/
 
 ## License
-*auto-generated*
+This project falls under the BSD 3-Clause License.
 
 ## History
 ### v0.0.0

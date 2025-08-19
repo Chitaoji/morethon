@@ -1,14 +1,13 @@
 """
-# $package
-A template repository for building python packages. Please replace `$package` with the package's
-name.
+# uquant
+A quant library.
 
 ## See Also
 ### Github repository
-* https://github.com/Chitaoji/$package/
+* https://github.com/Chitaoji/uquant/
 
 ### PyPI project
-* https://pypi.org/project/$package/
+* https://pypi.org/project/uquant/
 
 ## License
 This project falls under the BSD 3-Clause License.
