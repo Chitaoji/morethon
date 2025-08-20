@@ -1,11 +1,11 @@
 using snaps
 
-# 变量不可变，不可重复声明
+# 变量不可变，不可重复声明，类型自动推导
 a = 1 # int 
 avg.price = (close + open) / 2 # field
 mid.price = (ap[1] + bp[1]) / 2 # field
 
-# 类型自动推导
+# 强制类型转换
 int b = 1.0 # int
 field c = 1 # field
 
