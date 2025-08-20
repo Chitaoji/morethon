@@ -25,11 +25,14 @@ class UqTokenizer:
     """Parser of UqTokens."""
 
     def __init__(self) -> None:
-        self.iter = tuple()
+        self.iter = iter(())
 
     def parse_code(self, code: str) -> None:
         """Parse the code."""
         self.iter = chain(self.iter, tokenize(code))
+
+    def consume(self) -> UqToken:
+        """Consume a token."""
 
 
 def tokenize(code: str) -> Iterator[UqToken]:
