@@ -6,6 +6,6 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
-__all__ = ["UqProcessor"]
+__all__ = ["UqParser"]
 
-from .grammer import UqProcessor
+from .grammer import UqParser

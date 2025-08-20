@@ -7,9 +7,10 @@ NOTE: this module is private. All functions and objects are available in the mai
 """
 
 import re
+from itertools import chain
 from typing import Iterator, NamedTuple
 
-__all__ = ["UqToken", "tokenize"]
+__all__ = ["UqToken", "UqTokenizer"]
 
 
 class UqToken(NamedTuple):
@@ -18,6 +19,17 @@ class UqToken(NamedTuple):
     type: str
     value: str
     line: int
+
+
+class UqTokenizer:
+    """Parser of UqTokens."""
+
+    def __init__(self) -> None:
+        self.iter = tuple()
+
+    def parse_code(self, code: str) -> None:
+        """Parse the code."""
+        self.iter = chain(self.iter, tokenize(code))
 
 
 def tokenize(code: str) -> Iterator[UqToken]:

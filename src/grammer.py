@@ -6,18 +6,18 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
-from . import tokenize
+from .tokenize import UqTokenizer
 
-__all__ = ["UqProcessor"]
+__all__ = ["UqParser"]
 
 
-class UqProcessor:
+class UqParser:
     """Processor for uquant language."""
 
     def __init__(self) -> None:
         self.globals = {}
+        self.tokenizer = UqTokenizer()
 
-    def process(self, code: str) -> None:
-        """Process the code."""
-        for token in tokenize.tokenize(code):
-            print(token)
+    def parse_code(self, code: str) -> None:
+        """Parce the code."""
+        self.tokenizer.parse_code(code)

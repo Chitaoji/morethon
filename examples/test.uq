@@ -1,3 +1,4 @@
+# 模块引用
 using snaps
 
 # 变量不可变，不可重复声明，类型自动推导
@@ -17,14 +18,13 @@ unsigned f = {
 } # (field a, object b, c) => (a -> b -> c) -> a -> b -> c
 
 # 类型继承
-# object
-#   str
-#   type
-#   field
-#     bool
-#     int
-#     float
-# 例：object包含field，field包含int
+# object:
+# - str
+# - type
+# - field:
+#   - bool
+#   - int
+#   - float
 # 若a与b均为类型，a $ b表示两种类型的最小共同父类，如field $ int = field
 
 # factor
