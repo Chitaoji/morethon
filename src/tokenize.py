@@ -25,8 +25,8 @@ def tokenize(code: str) -> Iterator[UqToken]:
     keywords = {"using", "str", "field", "fac", "int", "float", "bool", "True", "False"}
     token_specification = [
         ("NUM", r"\d+(\.\d*)?"),  # Integer or decimal numbers
-        ("VARTYPE", r"=>"),  # Variable type hints
-        ("RESULT", r"->"),  # Function result hints
+        ("DOUBLEARROW", r"=>"),  # Double arrows
+        ("ARROW", r"->"),  # Arrows
         ("ASSIGN", r"="),  # Assignment operators
         ("END", r";"),  # Statement terminators
         ("ELLIPSIS", r"\.\.\."),  # Ellipsis
@@ -41,6 +41,7 @@ def tokenize(code: str) -> Iterator[UqToken]:
         ("RS", r"\]"),  # Right square brackets
         ("LB", r"{"),  # Left braces
         ("RB", r"}"),  # Right braces
+        ("DOUBLECOLON", r"::"),  # Double colons
         ("COLON", r":"),  # Colons
         ("COMMA", r","),  # Commas
         ("TYPEJOIN", r"\$"),  # Type join
