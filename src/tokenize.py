@@ -41,7 +41,6 @@ def tokenize(code: str) -> Iterator[UqToken]:
         ("RS", r"\]"),  # Right square brackets
         ("LB", r"{"),  # Left braces
         ("RB", r"}"),  # Right braces
-        ("DOUBLECOLON", r"::"),  # Double colons
         ("COLON", r":"),  # Colons
         ("COMMA", r","),  # Commas
         ("TYPEJOIN", r"\$"),  # Type join
