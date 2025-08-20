@@ -5,3 +5,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 `uquant` namespace - use that instead.
 
 """
+
+__all__ = ["UqProcessor"]
+
+from .grammer import UqProcessor

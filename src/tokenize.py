@@ -24,20 +24,26 @@ def tokenize(code: str) -> Iterator[UqToken]:
     """Tokenize the code."""
     keywords = {"using", "str", "field", "fac", "int", "float", "bool", "True", "False"}
     token_specification = [
-        ("NUM", r"\d+(\.\d*)?"),  # Integer or decimal number
-        ("ASSIGN", r"="),  # Assignment operator
-        ("END", r";"),  # Statement terminator
-        ("ID", r"[A-Za-z.]+"),  # Identifiers
+        ("NUM", r"\d+(\.\d*)?"),  # Integer or decimal numbers
+        ("VARTYPE", r"=>"),  # Variable type hints
+        ("RESULT", r"->"),  # Function result hints
+        ("ASSIGN", r"="),  # Assignment operators
+        ("END", r";"),  # Statement terminators
+        ("ELLIPSIS", r"\.\.\."),  # Ellipsis
+        ("ID", r"[A-Za-z._]+"),  # Identifiers
         ("OP", r"[+\-*/^]"),  # Arithmetic operators
         ("NEWLINE", r"\n"),  # Line endings
         ("SKIP", r"[ \t]+"),  # Skip over spaces and tabs
         ("COMMENT", r"#.*"),  # Comments
         ("LP", r"\("),  # Left parentheses
         ("RP", r"\)"),  # Right parentheses
+        ("LS", r"\["),  # Left square brackets
+        ("RS", r"\]"),  # Right square brackets
         ("LB", r"{"),  # Left braces
         ("RB", r"}"),  # Right braces
         ("COLON", r":"),  # Colons
         ("COMMA", r","),  # Commas
+        ("TYPEJOIN", r"\$"),  # Type join
         ("MISMATCH", r"."),  # Any other character
     ]
     tok_regex = "|".join(f"(?P<{pair[0]}>{pair[1]})" for pair in token_specification)
@@ -58,45 +64,3 @@ def tokenize(code: str) -> Iterator[UqToken]:
             case "MISMATCH":
                 raise RuntimeError(f"{value!r} unexpected on line {line_num}")
         yield UqToken(ttype, value, line_num)
-
-
-statements = """
-using snaps
-
-# 变量不可变，不可重复声明
-a = 1 # int 
-b = True # bool 
-avg.price = (close + open) / 2 # field
-mid.price = (ask1 + bid1) / 2 # field
-
-# 类型自动推导
-int c = 1.0 # int
-bool d = False # bool
-field e = 1 # field
-
-# 定义函数
-power: x, y = x ^ y # field a, b => a, b -> a ^ b
-unsigned: f = {
-    g: x, y = f(abs(x), y)
-    g
-} # field a, object b, c => (a, b -> c) -> (a, b -> c)
-
-# 类型继承
-# object
-#   str
-#   type
-#   field
-#     bool
-#     int
-#     float
-# 例：object包含field，field包含int
-# 若a与b均为类型，a ^ b表示两种类型的最小共同父类，field ^ int = field
-
-# factor
-# fac关键词定义的变量也是一个field，但在命名空间中会被强制添加'factor.'前缀，
-# （其他关键词定义的变量名称中不得含有此前缀）
-fac test = unsigned(power)(avg.price / mid.price - 1, 2) # field
-"""
-
-for token in tokenize(statements):
-    print(token)
