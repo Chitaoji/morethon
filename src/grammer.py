@@ -19,12 +19,14 @@ class UqParser:
         self.globals = {}
         self.tokenizer = UqTokenizer()
 
-    def parse_code(self, code: str) -> None:
+    def parse_code(self, code: str, glob: dict) -> None:
         """Parce the code."""
         self.tokenizer.parse_code(code)
+        local = {}
         while token := self.tokenizer.next():
             match token.type:
                 case "MISMATCH":
                     return unexpeted_token(token)
                 case "ID":
-                    pass
+                    if token.value in glob or token.value in local:
+                        pass
