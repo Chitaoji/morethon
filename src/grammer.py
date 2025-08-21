@@ -6,6 +6,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
+from .error import unexpeted_token
 from .tokenize import UqTokenizer
 
 __all__ = ["UqParser"]
@@ -21,3 +22,9 @@ class UqParser:
     def parse_code(self, code: str) -> None:
         """Parce the code."""
         self.tokenizer.parse_code(code)
+        while token := self.tokenizer.next():
+            match token.type:
+                case "MISMATCH":
+                    return unexpeted_token(token)
+                case "ID":
+                    pass

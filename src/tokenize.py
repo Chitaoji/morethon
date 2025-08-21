@@ -8,7 +8,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 import re
 from itertools import chain
-from typing import Iterator, NamedTuple
+from typing import Iterator, Literal, NamedTuple
 
 __all__ = ["UqToken", "UqTokenizer"]
 
@@ -16,7 +16,39 @@ __all__ = ["UqToken", "UqTokenizer"]
 class UqToken(NamedTuple):
     """Token for uquant language."""
 
-    type: str
+    type: Literal[
+        "NUM",
+        "DOUBLEARROW",
+        "ARROW",
+        "ASSIGN",
+        "END",
+        "ELLIPSIS",
+        "ID",
+        "OP",
+        "NEWLINE",
+        "SKIP",
+        "COMMENT",
+        "LP",
+        "RP",
+        "LS",
+        "RS",
+        "LB",
+        "RB",
+        "DOUBLECOLON",
+        "COLON",
+        "COMMA",
+        "TYPEJOIN",
+        "MISMATCH",
+        "USING",
+        "STR",
+        "FIELD",
+        "FAC",
+        "INT",
+        "FLOAT",
+        "BOOL",
+        "TRUE",
+        "FALSE",
+    ]
     value: str
     lineno: int
     code: str
@@ -66,8 +98,16 @@ class UqTokenizer:
         }
         self.iter = iter(())
 
-    def consume(self) -> UqToken:
-        """Consume a token."""
+    def next(self) -> UqToken | None:
+        """Return the next token if exists."""
+        return next(self.iter, None)
+
+    def consume(self, token_type: str) -> bool:
+        """Consume a token of token_type if exists."""
+        token = next(self.iter, None)
+        if token is not None and token.type == token_type:
+            return True
+        return False
 
     def parse_code(self, code: str) -> None:
         """Parse the code."""
@@ -89,6 +129,4 @@ class UqTokenizer:
                     continue
                 case "SKIP":
                     continue
-                case "MISMATCH":
-                    raise RuntimeError(f"{value!r} unexpected on line {lineno}")
             yield UqToken(ttype, value, lineno, code)
