@@ -6,7 +6,10 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
+from typing import NamedTuple
+
 from . import error
+from ._typing import ObjectType
 from .tokenize import UqTokenizer
 
 __all__ = ["UqParser"]
@@ -63,5 +66,8 @@ class UqParser:
                     error.unexpected_token(token)
 
 
-class UqObject:
-    pass
+class UqObject(NamedTuple):
+    """Object for uquant language."""
+
+    name: str
+    type: "ObjectType"
