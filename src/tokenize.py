@@ -68,6 +68,7 @@ class UqTokenizer:
             "bool",
             "True",
             "False",
+            "object",
         }
         self.iter = iter(())
         self.last_token = self.default_token = UqToken("NULL", "", 1, "")

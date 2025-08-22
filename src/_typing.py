@@ -43,5 +43,6 @@ TokenType = (
         "TRUE",
         "FALSE",
         "NULL",
+        "OBJECT",
     ]
 )

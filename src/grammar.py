@@ -6,7 +6,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
-from typing import NamedTuple
+from typing import Callable, NamedTuple, Self
 
 from . import error
 from ._typing import ObjectType
@@ -15,11 +15,26 @@ from .tokenize import UqTokenizer
 __all__ = ["UqParser"]
 
 
+class UqObject(NamedTuple):
+    """Object for uquant language."""
+
+    name: str
+    type: "ObjectType"
+    value: Callable | str | int | float | bool | None
+
+    def getval(self, arg: Self) -> Self:
+        """Get value if is function."""
+        return self.value(arg)
+
+    def is_function(self) -> bool:
+        """Is function."""
+        return self.type == "FUNCTION"
+
+
 class UqParser:
     """Processor for uquant language."""
 
     def __init__(self) -> None:
-        self.globals = {}
         self.tokenizer = UqTokenizer()
 
     def exec(self, code: str) -> None:
@@ -29,10 +44,10 @@ class UqParser:
         except error.UqError:
             pass
 
-    def open_loop(self, code: str, glob: dict) -> None:
+    def open_loop(self, code: str, glob: dict[str, UqObject]) -> None:
         """Open-loop behaviour."""
         self.tokenizer.parse_code(code)
-        local = {}
+        local: dict[str, UqObject] = {}
         while token := self.tokenizer.next():
             match token.type:
                 case "ID":
@@ -64,10 +79,3 @@ class UqParser:
                     pass
                 case _:
                     error.unexpected_token(token)
-
-
-class UqObject(NamedTuple):
-    """Object for uquant language."""
-
-    name: str
-    type: "ObjectType"
