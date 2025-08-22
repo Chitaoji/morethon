@@ -22,18 +22,42 @@ class UqParser:
     def exec(self, code: str) -> None:
         """Execute the code."""
         try:
-            self.parse_code(code, {})
+            self.open_loop(code, {})
         except error.UqError:
             pass
 
-    def parse_code(self, code: str, glob: dict) -> None:
-        """Parse the code and save the result in glob dict."""
+    def open_loop(self, code: str, glob: dict) -> None:
+        """Open-loop behaviour."""
         self.tokenizer.parse_code(code)
         local = {}
         while token := self.tokenizer.next():
             match token.type:
-                case "ILLEGAL":
-                    error.illegal_token(token)
                 case "ID":
                     if token.value in glob or token.value in local:
                         pass
+                case "LPAR":
+                    pass
+                case "LSQUARE":
+                    pass
+                case "LBRACE":
+                    pass
+                case "STR":
+                    pass
+                case "TYPE":
+                    pass
+                case "FIELD":
+                    pass
+                case "BOOL":
+                    pass
+                case "INT":
+                    pass
+                case "FLOAT":
+                    pass
+                case "FAC":
+                    pass
+                case "USING":
+                    pass
+                case "COMMENT":
+                    pass
+                case _:
+                    error.unexpected_token(token)

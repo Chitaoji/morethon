@@ -3,12 +3,13 @@ using snaps
 
 # 变量不可变，不可重复声明，类型自动推导
 a = 1 # int 
+b = [1, 2, 3] # [int]
 avg.price = (close + open) / 2 # field
 mid.price = (ap[1] + bp[1]) / 2 # field
 
 # 强制类型转换
-int b = 1.0 # int
-field c = 1 # field
+int c = 1.0 # int
+field d = 1 # field
 
 # 定义函数
 power x y = x ^ y # (field a, b) => a -> b -> a $ b
@@ -31,5 +32,3 @@ unsigned f = {
 # fac关键词定义的变量也是一个field，但在命名空间中会被强制添加'factor.'前缀，
 # （其他关键词定义的变量名称中不得含有此前缀）
 fac test = unsigned(power)(avg.price / mid.price - 1, 2) # field
-
-%

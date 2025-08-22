@@ -42,12 +42,12 @@ class UqTokenizer:
             "NEWLINE": r"\n",  # Line endings
             "SKIP": r"[ \t]+",  # Skip over spaces and tabs
             "COMMENT": r"#.*",  # Comments
-            "LP": r"\(",  # Left parentheses
-            "RP": r"\)",  # Right parentheses
-            "LS": r"\[",  # Left square brackets
-            "RS": r"\]",  # Right square brackets
-            "LB": r"{",  # Left braces
-            "RB": r"}",  # Right braces
+            "LPAR": r"\(",  # Left parentheses
+            "RPAR": r"\)",  # Right parentheses
+            "LSQUARE": r"\[",  # Left square brackets
+            "RSQUARE": r"\]",  # Right square brackets
+            "LBRACE": r"{",  # Left braces
+            "RBRACE": r"}",  # Right braces
             "DOUBLECOLON": r"::",  # Double Colons
             "COLON": r":",  # Colons
             "COMMA": r",",  # Commas
@@ -90,11 +90,9 @@ class UqTokenizer:
         """Tokenize the code."""
         lineno = 1
         for m in re.finditer(self.token_pattern, code):
-            ttype = m.lastgroup
+            ttype: "TokenType" = m.lastgroup
             value = m.group()
             match ttype:
-                case "NUM":
-                    value = float(value) if "." in value else int(value)
                 case "ID" if value in self.keywords:
                     ttype = value.upper()
                 case "NEWLINE":
@@ -102,4 +100,7 @@ class UqTokenizer:
                     continue
                 case "SKIP":
                     continue
-            yield UqToken(ttype, value, lineno, code)
+            token = UqToken(ttype, value, lineno, code)
+            if ttype == "ILLEGAL":
+                error.illegal_token(token)
+            yield token
