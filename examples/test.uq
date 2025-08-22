@@ -31,3 +31,5 @@ unsigned f = {
 # fac关键词定义的变量也是一个field，但在命名空间中会被强制添加'factor.'前缀，
 # （其他关键词定义的变量名称中不得含有此前缀）
 fac test = unsigned(power)(avg.price / mid.price - 1, 2) # field
+
+%

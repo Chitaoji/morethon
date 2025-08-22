@@ -11,9 +11,20 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .tokenize import UqToken
 
-__all__ = ["unexpeted_token"]
+__all__ = ["illegal_token", "mismatched_token"]
 
 
-def unexpeted_token(token: "UqToken") -> None:
-    """Unexpected token."""
-    print(f"unexpected token {token.value!r} on line {token.lineno}")
+def illegal_token(token: "UqToken") -> None:
+    """UqError."""
+    print(f"illegal token {token.value!r} on line {token.lineno}")
+    raise UqError()
+
+
+def mismatched_token(token: "UqToken", token_value: str) -> None:
+    """UqError."""
+    print(f"mismatched token {token_value!r} on line {token.lineno}")
+    raise UqError()
+
+
+class UqError(Exception):
+    """Error raised by uq language."""

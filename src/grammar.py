@@ -6,7 +6,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
-from .error import unexpeted_token
+from . import error
 from .tokenize import UqTokenizer
 
 __all__ = ["UqParser"]
@@ -19,14 +19,21 @@ class UqParser:
         self.globals = {}
         self.tokenizer = UqTokenizer()
 
+    def exec(self, code: str) -> None:
+        """Execute the code."""
+        try:
+            self.parse_code(code, {})
+        except error.UqError:
+            pass
+
     def parse_code(self, code: str, glob: dict) -> None:
-        """Parce the code."""
+        """Parse the code and save the result in glob dict."""
         self.tokenizer.parse_code(code)
         local = {}
         while token := self.tokenizer.next():
             match token.type:
-                case "MISMATCH":
-                    return unexpeted_token(token)
+                case "ILLEGAL":
+                    error.illegal_token(token)
                 case "ID":
                     if token.value in glob or token.value in local:
                         pass

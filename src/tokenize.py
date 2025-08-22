@@ -8,7 +8,12 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 import re
 from itertools import chain
-from typing import Iterator, Literal, NamedTuple
+from typing import TYPE_CHECKING, Iterator, NamedTuple
+
+from . import error
+
+if TYPE_CHECKING:
+    from ._typing import TokenType
 
 __all__ = ["UqToken", "UqTokenizer"]
 
@@ -16,39 +21,7 @@ __all__ = ["UqToken", "UqTokenizer"]
 class UqToken(NamedTuple):
     """Token for uquant language."""
 
-    type: Literal[
-        "NUM",
-        "DOUBLEARROW",
-        "ARROW",
-        "ASSIGN",
-        "END",
-        "ELLIPSIS",
-        "ID",
-        "OP",
-        "NEWLINE",
-        "SKIP",
-        "COMMENT",
-        "LP",
-        "RP",
-        "LS",
-        "RS",
-        "LB",
-        "RB",
-        "DOUBLECOLON",
-        "COLON",
-        "COMMA",
-        "TYPEJOIN",
-        "MISMATCH",
-        "USING",
-        "STR",
-        "FIELD",
-        "FAC",
-        "INT",
-        "FLOAT",
-        "BOOL",
-        "TRUE",
-        "FALSE",
-    ]
+    type: "TokenType"
     value: str
     lineno: int
     code: str
@@ -58,32 +31,31 @@ class UqTokenizer:
     """Parser of UqTokens."""
 
     def __init__(self) -> None:
-        token_specification = [
-            ("NUM", r"\d+(\.\d*)?"),  # Integer or decimal numbers
-            ("DOUBLEARROW", r"=>"),  # Double arrows
-            ("ARROW", r"->"),  # Arrows
-            ("ASSIGN", r"="),  # Assignment operators
-            ("END", r";"),  # Statement terminators
-            ("ELLIPSIS", r"\.\.\."),  # Ellipsis
-            ("ID", r"[A-Za-z._]+"),  # Identifiers
-            ("OP", r"[+\-*/^]"),  # Arithmetic operators
-            ("NEWLINE", r"\n"),  # Line endings
-            ("SKIP", r"[ \t]+"),  # Skip over spaces and tabs
-            ("COMMENT", r"#.*"),  # Comments
-            ("LP", r"\("),  # Left parentheses
-            ("RP", r"\)"),  # Right parentheses
-            ("LS", r"\["),  # Left square brackets
-            ("RS", r"\]"),  # Right square brackets
-            ("LB", r"{"),  # Left braces
-            ("RB", r"}"),  # Right braces
-            ("DOUBLECOLON", r"::"),  # Double Colons
-            ("COLON", r":"),  # Colons
-            ("COMMA", r","),  # Commas
-            ("TYPEJOIN", r"\$"),  # Type join
-            ("MISMATCH", r"."),  # Any other character
-        ]
+        self.token_spec = {
+            "NUM": r"\d+(\.\d*)?",  # Integer or decimal numbers
+            "DOUBLEARROW": r"=>",  # Double arrows
+            "ARROW": r"=",  # Assignment operators
+            "END": r";",  # Statement terminators
+            "ELLIPSIS": r"\.\.\.",  # Ellipsis
+            "ID": r"[A-Za-z._]+",  # Identifiers
+            "OP": r"[+\-*/^]",  # Arithmetic operators
+            "NEWLINE": r"\n",  # Line endings
+            "SKIP": r"[ \t]+",  # Skip over spaces and tabs
+            "COMMENT": r"#.*",  # Comments
+            "LP": r"\(",  # Left parentheses
+            "RP": r"\)",  # Right parentheses
+            "LS": r"\[",  # Left square brackets
+            "RS": r"\]",  # Right square brackets
+            "LB": r"{",  # Left braces
+            "RB": r"}",  # Right braces
+            "DOUBLECOLON": r"::",  # Double Colons
+            "COLON": r":",  # Colons
+            "COMMA": r",",  # Commas
+            "TYPEJOIN": r"\$",  # Type join
+            "ILLEGAL": r".",  # Any other character
+        }
         self.token_pattern = "|".join(
-            f"(?P<{pair[0]}>{pair[1]})" for pair in token_specification
+            f"(?P<{k}>{v})" for k, v in self.token_spec.items()
         )
         self.keywords = {
             "using",
@@ -97,17 +69,18 @@ class UqTokenizer:
             "False",
         }
         self.iter = iter(())
+        self.last_token = self.default_token = UqToken("NULL", "", 1, "")
 
-    def next(self) -> UqToken | None:
+    def next(self) -> UqToken:
         """Return the next token if exists."""
-        return next(self.iter, None)
+        self.last_token = next(self.iter, self.default_token)
+        return self.last_token
 
-    def consume(self, token_type: str) -> bool:
+    def consume(self, token_type: str) -> None:
         """Consume a token of token_type if exists."""
-        token = next(self.iter, None)
-        if token is not None and token.type == token_type:
-            return True
-        return False
+        self.last_token = next(self.iter, self.default_token)
+        if self.last_token.type != token_type:
+            error.mismatched_token(self.last_token, self.token_spec[token_type])
 
     def parse_code(self, code: str) -> None:
         """Parse the code."""
