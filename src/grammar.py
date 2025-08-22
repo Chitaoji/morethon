@@ -34,10 +34,6 @@ class UqVar(NamedTuple):
     type: "VarType"
     value: Callable[[Self], Self] | Field | str | int | float | bool | None
 
-    def getval(self, arg: Self) -> Self:
-        """Get value if is function."""
-        return self.value(arg)
-
     def astype(self, var_type: "VarType") -> Self:
         """As type."""
         if self.type == var_type:
@@ -71,6 +67,10 @@ class UqVar(NamedTuple):
     def is_function(self) -> bool:
         """Is function."""
         return self.type == "FUNCTION"
+
+    def getval(self, arg: Self) -> Self:
+        """Get value if is function."""
+        return self.value(arg)
 
 
 class UqParser:
