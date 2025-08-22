@@ -9,6 +9,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from .grammar import UqVar
     from .tokenize import UqToken
 
 __all__ = ["unexpected_token", "illegal_token", "mismatched_token"]
@@ -16,21 +17,51 @@ __all__ = ["unexpected_token", "illegal_token", "mismatched_token"]
 
 def unexpected_token(token: "UqToken") -> None:
     """UqError."""
-    print(f"unexpected token {token.value!r} on line {token.lineno}")
-    raise UqError()
+    UqSyntaxError(f"unexpected token {token.value!r} on line {token.lineno}").err()
 
 
 def illegal_token(token: "UqToken") -> None:
     """UqError."""
-    print(f"illegal token {token.value!r} on line {token.lineno}")
-    raise UqError()
+    UqSyntaxError(f"illegal token {token.value!r} on line {token.lineno}").err()
 
 
 def mismatched_token(token: "UqToken", token_value: str) -> None:
     """UqError."""
-    print(f"mismatched token {token_value!r} on line {token.lineno}")
-    raise UqError()
+    UqSyntaxError(f"mismatched token {token_value!r} on line {token.lineno}").err()
 
 
-class UqError(Exception):
-    """Error raised by uq language."""
+def invalid_type_trans(var: "UqVar", var_type: str) -> None:
+    """UqError."""
+    UqTypeError(f"invalid type transform from {var.type} to {var_type}").err()
+
+
+class ErrorFromUq(Exception):
+    """Error raised by uq parser."""
+
+
+class UqError:
+    """Uq error base class."""
+
+    def __init__(self, msg: str) -> None:
+        self.msg = msg
+
+    def err(self) -> None:
+        """Raise error."""
+        print(f"{self.__class__.__name__[2:]}{self.msg}")
+        raise ErrorFromUq()
+
+    def print(self) -> None:
+        """Print error message."""
+        print(f"{self.__class__.__name__[2:]}{self.msg}")
+
+
+class UqSyntaxError(UqError):
+    """Syntax error."""
+
+
+class UqValueError(UqError):
+    """Value error."""
+
+
+class UqTypeError(UqError):
+    """Type error."""

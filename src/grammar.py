@@ -6,13 +6,25 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
-from typing import Callable, NamedTuple, Self
+from typing import TYPE_CHECKING, Callable, NamedTuple, Self
 
 from . import error
-from ._typing import VarType
 from .tokenize import UqTokenizer
 
+if TYPE_CHECKING:
+    from ._typing import VarType
+
 __all__ = ["UqParser"]
+
+
+class Field:
+    """Uq field."""
+
+    def __init__(self, *args):
+        pass
+
+    def set_factor(self) -> None:
+        """Factor."""
 
 
 class UqVar(NamedTuple):
@@ -20,7 +32,7 @@ class UqVar(NamedTuple):
 
     name: str
     type: "VarType"
-    value: Callable[[Self], Self] | str | int | float | bool | None
+    value: Callable[[Self], Self] | Field | str | int | float | bool | None
 
     def getval(self, arg: Self) -> Self:
         """Get value if is function."""
@@ -28,6 +40,33 @@ class UqVar(NamedTuple):
 
     def astype(self, var_type: "VarType") -> Self:
         """As type."""
+        if self.type == var_type:
+            return self
+        match var_type:
+            case "FUNCTION" | "TYPE":
+                error.invalid_type_trans(self, var_type)
+            case "FIELD":
+                if self.type in {"INT", "FLOAT", "BOOL"}:
+                    new_value = Field(self.value)
+                error.invalid_type_trans(self, var_type)
+            case "FACTOR":
+                if self.type in {"INT", "FLOAT", "BOOL", "FIELD"}:
+                    new_value = Field(self.value)
+                    new_value.set_factor()
+                error.invalid_type_trans(self, var_type)
+            case "STR":
+                new_value = str(self.value)
+            case "INT":
+                if self.type in {"FLOAT", "BOOL"}:
+                    new_value = int(self.value)
+                error.invalid_type_trans(self, var_type)
+            case "FLOAT":
+                if self.type in {"INT", "BOOL"}:
+                    new_value = float(self.value)
+                error.invalid_type_trans(self, var_type)
+            case "BOOL":
+                new_value = bool(self.value)
+        return UqVar(self.name, var_type, new_value)
 
     def is_function(self) -> bool:
         """Is function."""
@@ -44,7 +83,7 @@ class UqParser:
         """Execute the code."""
         try:
             self.open_loop(code, {})
-        except error.UqError:
+        except error.ErrorFromUq:
             pass
 
     def open_loop(self, code: str, glob: dict[str, UqVar]) -> UqVar:
@@ -74,6 +113,7 @@ class UqParser:
                     pass
                 case _:
                     error.unexpected_token(token)
+        print(lastvar)
         return lastvar
 
     def force_type(
