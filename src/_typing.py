@@ -11,11 +11,9 @@ import loggings
 
 loggings.warning("this module is not intended to be imported at runtime")
 
-ObjectType = Literal[
-    "FUNCTION", "STR", "TYPE", "FIELD", "FACTOR", "INT", "FLOAT", "BOOL"
-]
+VarType = Literal["FUNCTION", "STR", "TYPE", "FIELD", "FACTOR", "INT", "FLOAT", "BOOL"]
 TokenType = (
-    ObjectType
+    VarType
     | Literal[
         "NUM",
         "DOUBLEARROW",
@@ -43,6 +41,5 @@ TokenType = (
         "TRUE",
         "FALSE",
         "NULL",
-        "OBJECT",
     ]
 )

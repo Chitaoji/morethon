@@ -9,22 +9,25 @@ NOTE: this module is private. All functions and objects are available in the mai
 from typing import Callable, NamedTuple, Self
 
 from . import error
-from ._typing import ObjectType
+from ._typing import VarType
 from .tokenize import UqTokenizer
 
 __all__ = ["UqParser"]
 
 
-class UqObject(NamedTuple):
-    """Object for uquant language."""
+class UqVar(NamedTuple):
+    """Defines variables in uquant language."""
 
     name: str
-    type: "ObjectType"
-    value: Callable | str | int | float | bool | None
+    type: "VarType"
+    value: Callable[[Self], Self] | str | int | float | bool | None
 
     def getval(self, arg: Self) -> Self:
         """Get value if is function."""
         return self.value(arg)
+
+    def astype(self, var_type: "VarType") -> Self:
+        """As type."""
 
     def is_function(self) -> bool:
         """Is function."""
@@ -44,38 +47,45 @@ class UqParser:
         except error.UqError:
             pass
 
-    def open_loop(self, code: str, glob: dict[str, UqObject]) -> None:
+    def open_loop(self, code: str, glob: dict[str, UqVar]) -> UqVar:
         """Open-loop behaviour."""
         self.tokenizer.parse_code(code)
-        local: dict[str, UqObject] = {}
+        local: dict[str, UqVar] = {}
+        lastvar = UqVar("", "NULL", None)
         while token := self.tokenizer.next():
-            match token.type:
+            match t := token.type:
                 case "ID":
                     if token.value in glob or token.value in local:
-                        pass
+                        lastvar = self.eval_var(local)
+                    else:
+                        local[token.value] = self.define_var(local)
                 case "LPAR":
                     pass
                 case "LSQUARE":
                     pass
                 case "LBRACE":
                     pass
-                case "STR":
-                    pass
-                case "TYPE":
-                    pass
-                case "FIELD":
-                    pass
-                case "BOOL":
-                    pass
-                case "INT":
-                    pass
-                case "FLOAT":
-                    pass
-                case "FAC":
-                    pass
+                case "STR" | "TYPE" | "FIELD" | "BOOL" | "INT" | "FLOAT" | "FACTOR":
+                    name, var = self.force_type(t, local)
+                    local[name] = var
                 case "USING":
                     pass
                 case "COMMENT":
                     pass
                 case _:
                     error.unexpected_token(token)
+        return lastvar
+
+    def force_type(
+        self, var_type: "VarType", glob: dict[str, UqVar]
+    ) -> tuple[str, UqVar]:
+        """Compulsively transform the type."""
+        return ..., ...
+
+    def define_var(self, glob: dict[str, UqVar]) -> UqVar:
+        """Define variable."""
+        return ...
+
+    def eval_var(self, glob: dict[str, UqVar]) -> UqVar:
+        """Evaluate e."""
+        return ...

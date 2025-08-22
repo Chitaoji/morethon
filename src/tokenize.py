@@ -26,6 +26,9 @@ class UqToken(NamedTuple):
     lineno: int
     code: str
 
+    def __bool__(self) -> bool:
+        return self.type != "NULL"
+
 
 class UqTokenizer:
     """Parser of UqTokens."""
@@ -68,7 +71,6 @@ class UqTokenizer:
             "bool",
             "True",
             "False",
-            "object",
         }
         self.iter = iter(())
         self.last_token = self.default_token = UqToken("NULL", "", 1, "")
