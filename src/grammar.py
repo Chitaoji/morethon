@@ -61,3 +61,7 @@ class UqParser:
                     pass
                 case _:
                     error.unexpected_token(token)
+
+
+class UqObject:
+    pass

@@ -18,17 +18,18 @@ unsigned f = {
     g
 } # (field a, object b, c) => (a -> b -> c) -> a -> b -> c
 
-# 类型继承
+# 基本类型
 # object:
+# - function
 # - str
 # - type
 # - field:
 #   - bool
 #   - int
 #   - float
-# 若a与b均为类型，a $ b表示两种类型的最小共同父类，如field $ int = field
+# a $ b表示两种类型的最小共同父类，如field $ int = field
 
 # factor
-# fac关键词定义的变量也是一个field，但在命名空间中会被强制添加'factor.'前缀，
+# factor关键词定义的变量也是一个field，但在命名空间中会被强制添加'factor.'前缀，
 # （其他关键词定义的变量名称中不得含有此前缀）
-fac test = unsigned(power)(avg.price / mid.price - 1, 2) # field
+factor test = unsigned(power)(avg.price / mid.price - 1, 2) # field

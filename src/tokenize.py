@@ -59,9 +59,10 @@ class UqTokenizer:
         )
         self.keywords = {
             "using",
+            "function",
             "str",
             "field",
-            "fac",
+            "factor",
             "int",
             "float",
             "bool",
