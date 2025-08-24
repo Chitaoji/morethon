@@ -82,7 +82,8 @@ class UqParser:
     def exec(self, code: str) -> None:
         """Execute the code."""
         try:
-            self.open_loop(code, {})
+            lastvar = self.open_loop(code, {})
+            print(lastvar)
         except error.ErrorFromUq:
             pass
 
@@ -92,13 +93,15 @@ class UqParser:
         local: dict[str, UqVar] = {}
         lastvar = UqVar("", "NULL", None)
         while token := self.tokenizer.next():
+            area = glob | local
             match t := token.type:
                 case "ID":
-                    area = glob | local
                     if token.value in area:
-                        lastvar = self.eval_var(area[token.value], local)
+                        lastvar = self.eval_var(area[token.value], area)
                     else:
-                        local[token.value] = lastvar = self.define_var(local)
+                        local[token.value] = lastvar = self.define_var(
+                            token.value, area
+                        )
                 case "LPAR":
                     pass
                 case "LSQUARE":
@@ -106,7 +109,7 @@ class UqParser:
                 case "LBRACE":
                     pass
                 case "STR" | "TYPE" | "FIELD" | "BOOL" | "INT" | "FLOAT" | "FACTOR":
-                    name, var = self.force_type(t, local)
+                    name, var = self.force_type(t, area)
                     local[name] = lastvar = var
                 case "USING":
                     pass
@@ -114,18 +117,19 @@ class UqParser:
                     pass
                 case _:
                     error.unexpected_token(token)
-        print(lastvar)
         return lastvar
 
     def force_type(
         self, var_type: "VarType", glob: dict[str, UqVar]
     ) -> tuple[str, UqVar]:
         """Compulsively transform the type."""
-        return ..., ...
+        var_name = self.tokenizer.expect("ID").value
+        var = self.define_var(var_name, glob)
+        return var.astype(var_type)
 
-    def define_var(self, glob: dict[str, UqVar]) -> UqVar:
+    def define_var(self, var_name: str, glob: dict[str, UqVar]) -> UqVar:
         """Define variable."""
-        return ...
+        return glob[var_name]
 
     def eval_var(self, var: UqVar, glob: dict[str, UqVar]) -> UqVar:
         """Evaluate e."""
@@ -139,3 +143,5 @@ class UqParser:
                 pass
             case "LBRACE":
                 pass
+            case _:
+                error.unexpected_token(token)
