@@ -45,6 +45,11 @@ def not_a_list(var: "UqVar") -> None:
     UqTypeError(f"not a list: {var.name}").err()
 
 
+# ==============================================================================
+#                                 Error types
+# ==============================================================================
+
+
 class ErrorFromUq(Exception):
     """Error raised by uq parser."""
 

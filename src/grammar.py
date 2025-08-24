@@ -137,7 +137,7 @@ class UqParser:
         """Compulsively transform the type."""
         var_name = self.tokenizer.expect("ID").value
         var = self.define_var(var_name, glob)
-        return var.astype(var_type)
+        return var_name, var.astype(var_type)
 
     def define_var(self, var_name: str, glob: dict[str, UqVar]) -> UqVar:
         """Define variable."""
