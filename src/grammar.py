@@ -94,10 +94,11 @@ class UqParser:
         while token := self.tokenizer.next():
             match t := token.type:
                 case "ID":
-                    if token.value in glob or token.value in local:
-                        lastvar = self.eval_var(local)
+                    area = glob | local
+                    if token.value in area:
+                        lastvar = self.eval_var(area[token.value], local)
                     else:
-                        local[token.value] = self.define_var(local)
+                        local[token.value] = lastvar = self.define_var(local)
                 case "LPAR":
                     pass
                 case "LSQUARE":
@@ -106,7 +107,7 @@ class UqParser:
                     pass
                 case "STR" | "TYPE" | "FIELD" | "BOOL" | "INT" | "FLOAT" | "FACTOR":
                     name, var = self.force_type(t, local)
-                    local[name] = var
+                    local[name] = lastvar = var
                 case "USING":
                     pass
                 case "COMMENT":
@@ -126,6 +127,15 @@ class UqParser:
         """Define variable."""
         return ...
 
-    def eval_var(self, glob: dict[str, UqVar]) -> UqVar:
+    def eval_var(self, var: UqVar, glob: dict[str, UqVar]) -> UqVar:
         """Evaluate e."""
-        return ...
+        token = self.tokenizer.next()
+        match t := token.type:
+            case "ID":
+                return var.getval(glob[token.value])
+            case "LPAR":
+                pass
+            case "LSQUARE":
+                pass
+            case "LBRACE":
+                pass
