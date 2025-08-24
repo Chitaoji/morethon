@@ -106,12 +106,16 @@ class UqParser:
         self.tokenizer.parse_code(code)
         local: dict[str, UqVar] = {}
         lastvar = UqVar.default()
+        varinline: bool = False
         while token := self.tokenizer.next():
             area = glob | local
             match t := token.type:
                 case "ID":
+                    if varinline:
+                        error.unexpected_token(token)
                     if token.value in area:
                         lastvar = self.eval_var(area[token.value], area)
+                        varinline = True
                     else:
                         local[token.value] = lastvar = self.define_var(
                             token.value, area
