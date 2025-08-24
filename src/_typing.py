@@ -11,7 +11,9 @@ import loggings
 
 loggings.warning("this module is not intended to be imported at runtime")
 
-VarType = Literal["FUNCTION", "STR", "TYPE", "FIELD", "FACTOR", "INT", "FLOAT", "BOOL"]
+VarType = Literal[
+    "FUNCTION", "STR", "TYPE", "FIELD", "FACTOR", "INT", "FLOAT", "BOOL", "LIST"
+]
 TokenType = (
     VarType
     | Literal[

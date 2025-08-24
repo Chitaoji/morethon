@@ -35,6 +35,16 @@ def invalid_type_trans(var: "UqVar", var_type: str) -> None:
     UqTypeError(f"invalid type transform from {var.type} to {var_type}").err()
 
 
+def not_a_function(var: "UqVar") -> None:
+    """UqError."""
+    UqTypeError(f"not a function: {var.name}").err()
+
+
+def not_a_list(var: "UqVar") -> None:
+    """UqError."""
+    UqTypeError(f"not a list: {var.name}").err()
+
+
 class ErrorFromUq(Exception):
     """Error raised by uq parser."""
 
