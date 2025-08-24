@@ -9,7 +9,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 from typing import TYPE_CHECKING, Callable, NamedTuple, Self
 
 from . import error
-from .tokenize import UqTokenizer
+from .tokenize import UqToken, UqTokenizer
 
 if TYPE_CHECKING:
     from ._typing import VarType
@@ -23,7 +23,7 @@ class Field:
     def __init__(self, *args):
         pass
 
-    def set_factor(self) -> None:
+    def record_as_factor(self) -> None:
         """Factor."""
 
 
@@ -34,6 +34,16 @@ class UqVar(NamedTuple):
     type: "VarType"
     value: Callable[[Self], Self] | Field | str | int | float | bool | None
 
+    @classmethod
+    def from_token(cls, token: UqToken) -> Self:
+        """Init from token."""
+        return cls("", token.type, token.value)
+
+    @classmethod
+    def default(cls) -> Self:
+        """Return a default instance."""
+        return cls("", "NULL", None)
+
     def astype(self, var_type: "VarType") -> Self:
         """As type."""
         if self.type == var_type:
@@ -43,7 +53,7 @@ class UqVar(NamedTuple):
                 new_value = Field(self.value)
             case "FACTOR" if self.type in {"INT", "FLOAT", "BOOL", "FIELD"}:
                 new_value = Field(self.value)
-                new_value.set_factor()
+                new_value.record_as_factor()
             case "STR":
                 new_value = str(self.value)
             case "INT" if self.type in {"FLOAT", "BOOL"}:
@@ -95,7 +105,7 @@ class UqParser:
         """Open-loop behaviour."""
         self.tokenizer.parse_code(code)
         local: dict[str, UqVar] = {}
-        lastvar = UqVar("", "NULL", None)
+        lastvar = UqVar.default()
         while token := self.tokenizer.next():
             area = glob | local
             match t := token.type:
@@ -160,7 +170,7 @@ class UqParser:
                 case "LSQUARE":
                     return var.getval(self.in_squares(glob))
                 case "INT":
-                    return var.getval(UqVar("", token.type, token.value))
+                    return var.getval(UqVar.from_token(token))
                 case _:
                     error.unexpected_token(token)
         return var

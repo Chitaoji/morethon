@@ -8,7 +8,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 import re
 from itertools import chain
-from typing import TYPE_CHECKING, Iterator, NamedTuple
+from typing import TYPE_CHECKING, Iterator, NamedTuple, Self
 
 from . import error
 
@@ -28,6 +28,11 @@ class UqToken(NamedTuple):
 
     def __bool__(self) -> bool:
         return self.type != "NULL"
+
+    @classmethod
+    def default(cls) -> Self:
+        """Return a default instance."""
+        return cls("NULL", "", 1, "")
 
 
 class UqTokenizer:
@@ -73,7 +78,7 @@ class UqTokenizer:
             "False",
         }
         self.iter = iter(())
-        self.last_token = self.default_token = UqToken("NULL", "", 1, "")
+        self.last_token = self.default_token = UqToken.default()
 
     def next(self) -> UqToken:
         """Return the next token if exists."""
