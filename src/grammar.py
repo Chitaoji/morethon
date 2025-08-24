@@ -39,29 +39,21 @@ class UqVar(NamedTuple):
         if self.type == var_type:
             return self
         match var_type:
-            case "FUNCTION" | "TYPE":
-                error.invalid_type_trans(self, var_type)
-            case "FIELD":
-                if self.type in {"INT", "FLOAT", "BOOL"}:
-                    new_value = Field(self.value)
-                error.invalid_type_trans(self, var_type)
-            case "FACTOR":
-                if self.type in {"INT", "FLOAT", "BOOL", "FIELD"}:
-                    new_value = Field(self.value)
-                    new_value.set_factor()
-                error.invalid_type_trans(self, var_type)
+            case "FIELD" if self.type in {"INT", "FLOAT", "BOOL"}:
+                new_value = Field(self.value)
+            case "FACTOR" if self.type in {"INT", "FLOAT", "BOOL", "FIELD"}:
+                new_value = Field(self.value)
+                new_value.set_factor()
             case "STR":
                 new_value = str(self.value)
-            case "INT":
-                if self.type in {"FLOAT", "BOOL"}:
-                    new_value = int(self.value)
-                error.invalid_type_trans(self, var_type)
-            case "FLOAT":
-                if self.type in {"INT", "BOOL"}:
-                    new_value = float(self.value)
-                error.invalid_type_trans(self, var_type)
+            case "INT" if self.type in {"FLOAT", "BOOL"}:
+                new_value = int(self.value)
+            case "FLOAT" if self.type in {"INT", "BOOL"}:
+                new_value = float(self.value)
             case "BOOL":
                 new_value = bool(self.value)
+            case _:
+                error.invalid_type_trans(self, var_type)
         return UqVar(self.name, var_type, new_value)
 
     def is_function(self) -> bool:
@@ -155,17 +147,22 @@ class UqParser:
             token = self.tokenizer.next()
             match token.type:
                 case "ID":
-                    return var.getres(glob[token.value])
+                    return self.eval_var(var.getres(glob[token.value]), glob)
                 case "LPAR":
                     return var.getres(self.in_parentheses(glob))
-                case "LSQUARE":
-                    return var.getval(self.in_squares(glob))
                 case "LBRACE":
                     return var.getres(self.in_braces(glob))
                 case _:
                     error.unexpected_token(token)
         elif var.is_list():
-            pass
+            token = self.tokenizer.next()
+            match token.type:
+                case "LSQUARE":
+                    return var.getval(self.in_squares(glob))
+                case "INT":
+                    return var.getval(UqVar("", token.type, token.value))
+                case _:
+                    error.unexpected_token(token)
         return var
 
     def in_parentheses(self, glob: dict[str, UqVar]) -> UqVar:

@@ -108,7 +108,6 @@ class UqTokenizer:
                     ttype = value.upper()
                 case "NEWLINE":
                     lineno += 1
-                    continue
                 case "SKIP":
                     continue
             token = UqToken(ttype, value, lineno, code)
