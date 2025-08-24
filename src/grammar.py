@@ -120,19 +120,25 @@ class UqParser:
                         local[token.value] = lastvar = self.define_var(
                             token.value, area
                         )
+                        varinline = True
                 case "LPAR":
-                    pass
+                    lastvar = self.in_parentheses(glob)
+                    varinline = True
                 case "LSQUARE":
-                    pass
+                    raise NotImplementedError()
                 case "LBRACE":
-                    pass
+                    lastvar = self.in_braces(glob)
+                    varinline = True
                 case "STR" | "TYPE" | "FIELD" | "BOOL" | "INT" | "FLOAT" | "FACTOR":
                     name, var = self.force_type(t, area)
                     local[name] = lastvar = var
+                    varinline = True
                 case "USING":
-                    pass
+                    raise NotImplementedError()
                 case "COMMENT":
-                    pass
+                    continue
+                case "NEWLINE":
+                    varinline = False
                 case _:
                     error.unexpected_token(token)
         return lastvar
