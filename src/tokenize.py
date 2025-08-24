@@ -37,7 +37,7 @@ class UqTokenizer:
         self.token_spec = {
             "NUM": r"\d+(\.\d*)?",  # Integer or decimal numbers
             "DOUBLEARROW": r"=>",  # Double arrows
-            "ARROW": r"=",  # Assignment operators
+            "ASSIGN": r"=",  # Assignment operators
             "END": r";",  # Statement terminators
             "ELLIPSIS": r"\.\.\.",  # Ellipsis
             "ID": r"[A-Za-z._]+",  # Identifiers

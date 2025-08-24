@@ -19,7 +19,7 @@ TokenType = (
     | Literal[
         "NUM",
         "DOUBLEARROW",
-        "ARROW",
+        "ASSIGN",
         "ASSIGN",
         "END",
         "ELLIPSIS",

@@ -141,22 +141,32 @@ class UqParser:
 
     def define_var(self, var_name: str, glob: dict[str, UqVar]) -> UqVar:
         """Define variable."""
-        return glob[var_name]
-
-    def eval_var(self, var: UqVar, glob: dict[str, UqVar]) -> UqVar:
-        """Evaluate variable."""
+        raise NotImplementedError()
         token = self.tokenizer.next()
         match token.type:
             case "ID":
-                return var.getres(glob[token.value])
-            case "LPAR":
-                return var.getres(self.in_parentheses(glob))
-            case "LSQUARE":
-                return var.getval(self.in_squares(glob))
-            case "LBRACE":
-                return var.getres(self.in_braces(glob))
-            case _:
-                error.unexpected_token(token)
+                raise NotImplementedError()
+            case "ASSIGN":
+                raise NotImplementedError()
+
+    def eval_var(self, var: UqVar, glob: dict[str, UqVar]) -> UqVar:
+        """Evaluate variable."""
+        if var.is_function():
+            token = self.tokenizer.next()
+            match token.type:
+                case "ID":
+                    return var.getres(glob[token.value])
+                case "LPAR":
+                    return var.getres(self.in_parentheses(glob))
+                case "LSQUARE":
+                    return var.getval(self.in_squares(glob))
+                case "LBRACE":
+                    return var.getres(self.in_braces(glob))
+                case _:
+                    error.unexpected_token(token)
+        elif var.is_list():
+            pass
+        return var
 
     def in_parentheses(self, glob: dict[str, UqVar]) -> UqVar:
         """Evaluate variable in parentheses."""
