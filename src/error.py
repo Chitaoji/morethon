@@ -45,6 +45,16 @@ def not_a_list(var: "UqVar") -> None:
     UqTypeError(f"not a list: {var.name}").err()
 
 
+def variable_already_defined(var_name: str) -> None:
+    """UqError."""
+    UqKeyError(f"variable already defined: {var_name!r}").err()
+
+
+def namespace_already_defined(namespace: str) -> None:
+    """UqError."""
+    UqKeyError(f"namespace already defined: {namespace!r}").err()
+
+
 # ==============================================================================
 #                                 Error types
 # ==============================================================================
@@ -80,3 +90,7 @@ class UqValueError(UqError):
 
 class UqTypeError(UqError):
     """Type error."""
+
+
+class UqKeyError(UqError):
+    """Key error."""

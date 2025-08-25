@@ -6,6 +6,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
+import re
 from typing import TYPE_CHECKING, Callable, NamedTuple, Self
 
 from . import error
@@ -87,6 +88,43 @@ class UqVar(NamedTuple):
         return self.value(arg)
 
 
+class UqNamespace:
+    """Defines namespaces in uquant language."""
+
+    name: str
+    variables: dict[str, UqVar]
+    namespaces: dict[str, Self]
+
+    def __contains__(self, key: str, /) -> bool:
+        splited = re.split(r"\.|::", key, maxsplit=1)
+        if len(splited) == 1:
+            return key in self.variables
+        sp, name = splited
+        return sp in self.namespaces and name in self.namespaces[sp]
+
+    def __getitem__(self, key: str, /) -> UqVar:
+        splited = re.split(r"\.|::", key, maxsplit=1)
+        if len(splited) == 1:
+            return self.variables[key]
+        sp, name = splited
+        return self.namespaces[sp][name]
+
+    def __setitem__(self, key: str, /) -> UqVar:
+        splited = re.split(r"\.|::", key, maxsplit=1)
+        if len(splited) == 1:
+            if key in self.variables:
+                error.variable_already_defined(key)
+            return self.variables[key]
+        sp, name = splited
+        if sp in self.namespaces:
+            error.namespace_already_defined(sp)
+        return self.namespaces[sp][name]
+
+    def new(self) -> Self:
+        """Renew a namespace."""
+        return self.__class__(self.name, self.variables.copy(), self.namespaces.copy())
+
+
 class UqParser:
     """Processor for uquant language."""
 
@@ -96,41 +134,41 @@ class UqParser:
     def exec(self, code: str) -> None:
         """Execute the code."""
         try:
-            lastvar = self.open_loop(code, {})
+            lastvar = self.open_loop(code, UqNamespace("main", {}, {}))
             print(lastvar)
         except error.ErrorFromUq:
             pass
 
-    def open_loop(self, code: str, glob: dict[str, UqVar]) -> UqVar:
+    def open_loop(self, code: str, glob: UqNamespace) -> UqVar:
         """Open-loop behaviour."""
         self.tokenizer.parse_code(code)
-        local: dict[str, UqVar] = {}
         lastvar = UqVar.default()
         varinline: bool = False
+        local = glob.new()
+
         while token := self.tokenizer.next():
-            area = glob | local
             match t := token.type:
                 case "ID":
                     if varinline:
                         error.unexpected_token(token)
-                    if token.value in area:
-                        lastvar = self.eval_var(area[token.value], area)
+                    if token.value in local:
+                        lastvar = self.eval_var(local[token.value], local)
                         varinline = True
                     else:
                         local[token.value] = lastvar = self.define_var(
-                            token.value, area
+                            token.value, local
                         )
                         varinline = True
                 case "LPAR":
-                    lastvar = self.in_parentheses(glob)
+                    lastvar = self.in_parentheses(local)
                     varinline = True
                 case "LSQUARE":
                     raise NotImplementedError()
                 case "LBRACE":
-                    lastvar = self.in_braces(glob)
+                    lastvar = self.in_braces(local)
                     varinline = True
                 case "STR" | "TYPE" | "FIELD" | "BOOL" | "INT" | "FLOAT" | "FACTOR":
-                    name, var = self.force_type(t, area)
+                    name, var = self.force_type(t, local)
                     local[name] = lastvar = var
                     varinline = True
                 case "USING":
