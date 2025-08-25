@@ -154,12 +154,14 @@ class UqParser:
     def define_var(self, var_name: str, glob: dict[str, UqVar]) -> UqVar:
         """Define variable."""
         raise NotImplementedError()
-        token = self.tokenizer.next()
-        match token.type:
-            case "ID":
-                raise NotImplementedError()
-            case "ASSIGN":
-                raise NotImplementedError()
+
+        local: dict[str, UqVar] = {}
+        while token := self.tokenizer.next():
+            match token.type:
+                case "ID":
+                    local[token.value] = UqVar.default()
+                case "ASSIGN":
+                    raise NotImplementedError()
 
     def eval_var(self, var: UqVar, glob: dict[str, UqVar]) -> UqVar:
         """Evaluate variable."""

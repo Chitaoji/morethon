@@ -42,6 +42,7 @@ class UqTokenizer:
         self.token_spec = {
             "NUM": r"\d+(\.\d*)?",  # Integer or decimal numbers
             "DOUBLEARROW": r"=>",  # Double arrows
+            "TYPEASSIGN": r":=",  # Type-assignment operators
             "ASSIGN": r"=",  # Assignment operators
             "END": r";",  # Statement terminators
             "ELLIPSIS": r"\.\.\.",  # Ellipsis
