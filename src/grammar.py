@@ -96,33 +96,30 @@ class UqNamespace:
     namespaces: dict[str, Self]
 
     def __contains__(self, key: str, /) -> bool:
-        splited = re.split(r"\.|::", key, maxsplit=1)
+        splited = re.split(r"::", key, maxsplit=1)
         if len(splited) == 1:
             return key in self.variables
         sp, name = splited
         return sp in self.namespaces and name in self.namespaces[sp]
 
     def __getitem__(self, key: str, /) -> UqVar:
-        splited = re.split(r"\.|::", key, maxsplit=1)
+        splited = re.split(r"::", key, maxsplit=1)
         if len(splited) == 1:
             return self.variables[key]
         sp, name = splited
         return self.namespaces[sp][name]
 
     def __setitem__(self, key: str, /) -> UqVar:
-        splited = re.split(r"\.|::", key, maxsplit=1)
-        if len(splited) == 1:
-            if key in self.variables:
-                error.variable_already_defined(key)
-            return self.variables[key]
-        sp, name = splited
-        if sp in self.namespaces:
-            error.namespace_already_defined(sp)
-        return self.namespaces[sp][name]
+        if "::" in key:
+            splited = re.split(r"::", key, maxsplit=1)
+            error.setting_namespace(splited[0])
+        if key in self.variables:
+            error.variable_already_defined(key)
+        return self.variables[key]
 
     def new(self) -> Self:
         """Renew a namespace."""
-        return self.__class__(self.name, self.variables.copy(), self.namespaces.copy())
+        return self.__class__(self.name, self.variables.copy(), self.namespaces)
 
 
 class UqParser:

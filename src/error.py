@@ -50,9 +50,9 @@ def variable_already_defined(var_name: str) -> None:
     UqKeyError(f"variable already defined: {var_name!r}").err()
 
 
-def namespace_already_defined(namespace: str) -> None:
+def setting_namespace(namespace: str) -> None:
     """UqError."""
-    UqKeyError(f"namespace already defined: {namespace!r}").err()
+    UqKeyError(f"trying to set variable in namespace: {namespace!r}").err()
 
 
 # ==============================================================================
