@@ -16,43 +16,53 @@ __all__ = ["unexpected_token", "illegal_token", "mismatched_token"]
 
 
 def unexpected_token(token: "UqToken") -> None:
-    """UqError."""
+    """Raises UqError."""
     UqSyntaxError(f"unexpected token {token.value!r} on line {token.lineno}").err()
 
 
 def illegal_token(token: "UqToken") -> None:
-    """UqError."""
+    """Raises UqError."""
     UqSyntaxError(f"illegal token {token.value!r} on line {token.lineno}").err()
 
 
 def mismatched_token(token: "UqToken", token_value: str) -> None:
-    """UqError."""
+    """Raises UqError."""
     UqSyntaxError(f"mismatched token {token_value!r} on line {token.lineno}").err()
 
 
 def invalid_type_trans(var: "UqVar", var_type: str) -> None:
-    """UqError."""
+    """Raises UqError."""
     UqTypeError(f"invalid type transform from {var.type} to {var_type}").err()
 
 
 def not_a_function(var: "UqVar") -> None:
-    """UqError."""
+    """Raises UqError."""
     UqTypeError(f"not a function: {var.name}").err()
 
 
 def not_a_list(var: "UqVar") -> None:
-    """UqError."""
+    """Raises UqError."""
     UqTypeError(f"not a list: {var.name}").err()
 
 
-def variable_already_defined(var_name: str) -> None:
-    """UqError."""
-    UqKeyError(f"variable already defined: {var_name!r}").err()
+def not_defined(var_name: str) -> None:
+    """Raises UqError."""
+    UqNameError(f"variable not defined yet: {var_name!r}").err()
+
+
+def already_defined(var_name: str) -> None:
+    """Raises UqError."""
+    UqNameError(f"variable already defined: {var_name!r}").err()
 
 
 def setting_namespace(namespace: str) -> None:
-    """UqError."""
-    UqKeyError(f"trying to set variable in namespace: {namespace!r}").err()
+    """Raises UqError."""
+    UqNameError(f"trying to set variable in namespace: {namespace!r}").err()
+
+
+def getting_namespace(namespace: str) -> None:
+    """Raises UqError."""
+    UqNameError(f"is a namespace: {namespace!r}").err()
 
 
 # ==============================================================================
@@ -92,5 +102,5 @@ class UqTypeError(UqError):
     """Type error."""
 
 
-class UqKeyError(UqError):
+class UqNameError(UqError):
     """Key error."""

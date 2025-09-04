@@ -98,13 +98,17 @@ class UqNamespace:
     def __contains__(self, key: str, /) -> bool:
         splited = re.split(r"::", key, maxsplit=1)
         if len(splited) == 1:
-            return key in self.variables
+            return key in self.variables or key in self.namespaces
         sp, name = splited
         return sp in self.namespaces and name in self.namespaces[sp]
 
     def __getitem__(self, key: str, /) -> UqVar:
+        if not key in self:
+            error.not_defined(key)
         splited = re.split(r"::", key, maxsplit=1)
         if len(splited) == 1:
+            if key in self.namespaces:
+                error.getting_namespace(key)
             return self.variables[key]
         sp, name = splited
         return self.namespaces[sp][name]
@@ -113,8 +117,8 @@ class UqNamespace:
         if "::" in key:
             splited = re.split(r"::", key, maxsplit=1)
             error.setting_namespace(splited[0])
-        if key in self.variables:
-            error.variable_already_defined(key)
+        if key in self:
+            error.already_defined(key)
         return self.variables[key]
 
     def new(self) -> Self:
