@@ -75,13 +75,13 @@ class UqVar(NamedTuple):
         """Is self a list."""
         return self.type == "LIST"
 
-    def getres(self, arg: Self) -> Self:
+    def eval(self, arg: Self) -> Self:
         """Get value if is function."""
         if not self.is_function():
             error.not_a_function(self)
         return self.value(arg)
 
-    def getval(self, arg: Self) -> Self:
+    def get(self, arg: Self) -> Self:
         """Get value if is list."""
         if not self.is_list():
             error.not_a_list(self)
@@ -182,15 +182,13 @@ class UqParser:
                     error.unexpected_token(token)
         return lastvar
 
-    def force_type(
-        self, var_type: "VarType", glob: dict[str, UqVar]
-    ) -> tuple[str, UqVar]:
+    def force_type(self, var_type: "VarType", glob: UqNamespace) -> tuple[str, UqVar]:
         """Compulsively transform the type."""
         var_name = self.tokenizer.expect("ID").value
         var = self.define_var(var_name, glob)
         return var_name, var.astype(var_type)
 
-    def define_var(self, var_name: str, glob: dict[str, UqVar]) -> UqVar:
+    def define_var(self, var_name: str, glob: UqNamespace) -> UqVar:
         """Define variable."""
         raise NotImplementedError()
 
@@ -202,38 +200,38 @@ class UqParser:
                 case "ASSIGN":
                     raise NotImplementedError()
 
-    def eval_var(self, var: UqVar, glob: dict[str, UqVar]) -> UqVar:
+    def eval_var(self, var: UqVar, glob: UqNamespace) -> UqVar:
         """Evaluate variable."""
         if var.is_function():
             token = self.tokenizer.next()
             match token.type:
                 case "ID":
-                    return self.eval_var(var.getres(glob[token.value]), glob)
+                    return self.eval_var(var.eval(glob[token.value]), glob)
                 case "LPAR":
-                    return var.getres(self.in_parentheses(glob))
+                    return var.eval(self.in_parentheses(glob))
                 case "LBRACE":
-                    return var.getres(self.in_braces(glob))
+                    return var.eval(self.in_braces(glob))
                 case _:
                     error.unexpected_token(token)
         elif var.is_list():
             token = self.tokenizer.next()
             match token.type:
                 case "LSQUARE":
-                    return var.getval(self.in_squares(glob))
+                    return var.get(self.in_squares(glob))
                 case "INT":
-                    return var.getval(UqVar.from_token(token))
+                    return var.get(UqVar.from_token(token))
                 case _:
                     error.unexpected_token(token)
         return var
 
-    def in_parentheses(self, glob: dict[str, UqVar]) -> UqVar:
+    def in_parentheses(self, glob: UqNamespace) -> UqVar:
         """Evaluate variable in parentheses."""
         raise NotImplementedError()
 
-    def in_squares(self, glob: dict[str, UqVar]) -> UqVar:
+    def in_squares(self, glob: UqNamespace) -> UqVar:
         """Evaluate variable in square brackets."""
         raise NotImplementedError()
 
-    def in_braces(self, glob: dict[str, UqVar]) -> UqVar:
+    def in_braces(self, glob: UqNamespace) -> UqVar:
         """Evaluate variable in braces."""
         raise NotImplementedError()
