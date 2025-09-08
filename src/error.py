@@ -30,9 +30,11 @@ def mismatched_token(token: "UqToken", token_value: str) -> None:
     UqSyntaxError(f"mismatched token {token_value!r} on line {token.lineno}").err()
 
 
-def invalid_type_trans(var: "UqVar", var_type: str) -> None:
+def is_not_type(var: "UqVar", var_type: str) -> None:
     """Raises UqError."""
-    UqTypeError(f"invalid type transform from {var.type} to {var_type}").err()
+    UqTypeError(
+        f"variable {var.name!r} is of type {var.type!r}, but not {var_type!r}"
+    ).err()
 
 
 def not_a_function(var: "UqVar") -> None:

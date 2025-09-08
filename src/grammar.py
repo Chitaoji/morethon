@@ -28,6 +28,13 @@ class Field:
         """Factor."""
 
 
+class UqFuncType(NamedTuple):
+    """Defines function type in uquant language."""
+
+    require: "VarType"
+    returns: "VarType"
+
+
 class UqVar(NamedTuple):
     """Defines variables in uquant language."""
 
@@ -45,31 +52,15 @@ class UqVar(NamedTuple):
         """Return a default instance."""
         return cls("", "NULL", None)
 
-    def astype(self, var_type: "VarType") -> Self:
-        """As type."""
-        if self.type == var_type:
+    def force_type(self, var_type: "VarType") -> Self:
+        """Force to the type."""
+        if (self.type == var_type) or (self.is_function() and var_type == "FUNCTION"):
             return self
-        match var_type:
-            case "FIELD" if self.type in {"INT", "FLOAT", "BOOL"}:
-                new_value = Field(self.value)
-            case "FACTOR" if self.type in {"INT", "FLOAT", "BOOL", "FIELD"}:
-                new_value = Field(self.value)
-                new_value.record_as_factor()
-            case "STR":
-                new_value = str(self.value)
-            case "INT" if self.type in {"FLOAT", "BOOL"}:
-                new_value = int(self.value)
-            case "FLOAT" if self.type in {"INT", "BOOL"}:
-                new_value = float(self.value)
-            case "BOOL":
-                new_value = bool(self.value)
-            case _:
-                error.invalid_type_trans(self, var_type)
-        return UqVar(self.name, var_type, new_value)
+        error.is_not_type(self, var_type)
 
     def is_function(self) -> bool:
         """Is self a function."""
-        return self.type == "FUNCTION"
+        return isinstance(self.type, UqFuncType)
 
     def is_list(self) -> bool:
         """Is self a list."""
@@ -81,8 +72,8 @@ class UqVar(NamedTuple):
             error.not_a_function(self)
         return self.value(arg)
 
-    def get(self, arg: Self) -> Self:
-        """Get value if is list."""
+    def getitem(self, arg: Self) -> Self:
+        """Get item if is list."""
         if not self.is_list():
             error.not_a_list(self)
         return self.value(arg)
@@ -186,7 +177,7 @@ class UqParser:
         """Compulsively transform the type."""
         var_name = self.tokenizer.expect("ID").value
         var = self.define_var(var_name, glob)
-        return var_name, var.astype(var_type)
+        return var_name, var.force_type(var_type)
 
     def define_var(self, var_name: str, glob: UqNamespace) -> UqVar:
         """Define variable."""
@@ -217,9 +208,9 @@ class UqParser:
             token = self.tokenizer.next()
             match token.type:
                 case "LSQUARE":
-                    return var.get(self.in_squares(glob))
+                    return var.getitem(self.in_squares(glob))
                 case "INT":
-                    return var.get(UqVar.from_token(token))
+                    return var.getitem(UqVar.from_token(token))
                 case _:
                     error.unexpected_token(token)
         return var
