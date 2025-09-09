@@ -1,23 +1,20 @@
 """Execute morethon."""
 
-import argparse
 from pathlib import Path
+
+import click
 
 from .grammar import UqParser
 
 
-class StartAction(argparse.Action):
-    """Start Action."""
+@click.command(context_settings={"help_option_names": ["-h", "--help"]})
+@click.argument("filename", default="")
+def run(filename: str) -> None:
+    """
+    Run the morethon interpreter.
 
-    def __call__(self, *args): ...
+    If FILENAME is specified, read from script file;
+    otherwise read from std input.
 
-
-parser = argparse.ArgumentParser(description="morethon")
-parser.add_argument("file", nargs="?", help="read from script file")
-parser.add_argument(".", nargs=0, action=StartAction, help="read from std input")
-
-namespace = vars(parser.parse_args())
-if namespace["file"]:
-    UqParser().exec(Path(namespace["file"]).read_text("utf-8"))
-else:
-    print("not implemented yet")
+    """
+    UqParser().exec(Path(filename).read_text("utf-8"))

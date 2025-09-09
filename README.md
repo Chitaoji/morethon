@@ -8,7 +8,7 @@ $ pip install morethon
 
 ## Requirements
 ```txt
-
+click
 ```
 
 ## See Also
