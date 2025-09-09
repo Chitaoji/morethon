@@ -9,7 +9,7 @@ from typing import Literal
 
 import loggings
 
-from .grammar import UqFuncType
+from .grammar import MoFuncType
 
 loggings.warning("this module is not intended to be imported at runtime")
 
@@ -17,7 +17,7 @@ VarType = (
     Literal[
         "FUNCTION", "STR", "TYPE", "FIELD", "FACTOR", "INT", "FLOAT", "BOOL", "LIST"
     ]
-    | UqFuncType
+    | MoFuncType
 )
 TokenType = (
     VarType

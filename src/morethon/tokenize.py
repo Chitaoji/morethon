@@ -15,10 +15,10 @@ from . import error
 if TYPE_CHECKING:
     from ._typing import TokenType
 
-__all__ = ["UqToken", "UqTokenizer"]
+__all__ = ["MoToken", "MoTokenizer"]
 
 
-class UqToken(NamedTuple):
+class MoToken(NamedTuple):
     """Token for morethon language."""
 
     type: "TokenType"
@@ -35,8 +35,8 @@ class UqToken(NamedTuple):
         return cls("NULL", "", 1, "")
 
 
-class UqTokenizer:
-    """Parser of UqTokens."""
+class MoTokenizer:
+    """Parser of MoTokens."""
 
     def __init__(self) -> None:
         self.token_spec = {
@@ -79,14 +79,14 @@ class UqTokenizer:
             "False",
         }
         self.iter = iter(())
-        self.last_token = self.default_token = UqToken.default()
+        self.last_token = self.default_token = MoToken.default()
 
-    def next(self) -> UqToken:
+    def next(self) -> MoToken:
         """Return the next token if exists."""
         self.last_token = next(self.iter, self.default_token)
         return self.last_token
 
-    def expect(self, token_type: "TokenType") -> UqToken:
+    def expect(self, token_type: "TokenType") -> MoToken:
         """Return the next token if is of token_type."""
         self.last_token = next(self.iter, self.default_token)
         if self.last_token.type != token_type:
@@ -103,7 +103,7 @@ class UqTokenizer:
         """Parse the code."""
         self.iter = chain(self.iter, self.tokenize(code))
 
-    def tokenize(self, code: str) -> Iterator[UqToken]:
+    def tokenize(self, code: str) -> Iterator[MoToken]:
         """Tokenize the code."""
         lineno = 1
         for m in re.finditer(self.token_pattern, code):
@@ -116,7 +116,7 @@ class UqTokenizer:
                     lineno += 1
                 case "SKIP":
                     continue
-            token = UqToken(ttype, value, lineno, code)
+            token = MoToken(ttype, value, lineno, code)
             if ttype == "ILLEGAL":
                 error.illegal_token(token)
             yield token

@@ -10,16 +10,16 @@ import re
 from typing import TYPE_CHECKING, Callable, NamedTuple, Self
 
 from . import error
-from .tokenize import UqToken, UqTokenizer
+from .tokenize import MoToken, MoTokenizer
 
 if TYPE_CHECKING:
     from ._typing import VarType
 
-__all__ = ["UqParser"]
+__all__ = ["MoParser"]
 
 
 class Field:
-    """Uq field."""
+    """Morethon field."""
 
     def __init__(self, *args):
         pass
@@ -28,14 +28,14 @@ class Field:
         """Factor."""
 
 
-class UqFuncType(NamedTuple):
+class MoFuncType(NamedTuple):
     """Defines function type in morethon language."""
 
     require: "VarType"
     returns: "VarType"
 
 
-class UqVar(NamedTuple):
+class MoVar(NamedTuple):
     """Defines variables in morethon language."""
 
     name: str
@@ -43,7 +43,7 @@ class UqVar(NamedTuple):
     value: Callable[[Self], Self] | Field | str | int | float | bool | None
 
     @classmethod
-    def from_token(cls, token: UqToken) -> Self:
+    def from_token(cls, token: MoToken) -> Self:
         """Init from token."""
         return cls("", token.type, token.value)
 
@@ -60,7 +60,7 @@ class UqVar(NamedTuple):
 
     def is_function(self) -> bool:
         """Is self a function."""
-        return isinstance(self.type, UqFuncType)
+        return isinstance(self.type, MoFuncType)
 
     def is_list(self) -> bool:
         """Is self a list."""
@@ -83,11 +83,11 @@ class UqVar(NamedTuple):
         self.name = name
 
 
-class UqNamespace(NamedTuple):
+class MoNamespace(NamedTuple):
     """Defines namespaces in morethon language."""
 
     name: str
-    variables: dict[str, UqVar]
+    variables: dict[str, MoVar]
     namespaces: dict[str, Self]
 
     def __contains__(self, key: str, /) -> bool:
@@ -97,7 +97,7 @@ class UqNamespace(NamedTuple):
         sp, name = splited
         return sp in self.namespaces and name in self.namespaces[sp]
 
-    def __getitem__(self, key: str, /) -> UqVar:
+    def __getitem__(self, key: str, /) -> MoVar:
         if not key in self:
             error.not_defined(key)
         splited = re.split(r"::", key, maxsplit=1)
@@ -108,7 +108,7 @@ class UqNamespace(NamedTuple):
         sp, name = splited
         return self.namespaces[sp][name]
 
-    def __setitem__(self, key: str, /) -> UqVar:
+    def __setitem__(self, key: str, /) -> MoVar:
         if "::" in key:
             splited = re.split(r"::", key, maxsplit=1)
             error.setting_namespace(splited[0])
@@ -121,23 +121,23 @@ class UqNamespace(NamedTuple):
         return self.__class__(self.name, self.variables.copy(), self.namespaces)
 
 
-class UqParser:
+class MoParser:
     """Processor for morethon language."""
 
     def __init__(self) -> None:
-        self.tokenizer = UqTokenizer()
+        self.tokenizer = MoTokenizer()
 
     def exec(self, code: str) -> None:
         """Execute the code."""
         self.tokenizer.parse_code(code)
-        glob = UqNamespace("main", {}, {})
+        glob = MoNamespace("main", {}, {})
         try:
             lastvar = self.open_loop(glob)
             print(lastvar)
-        except error.ErrorFromUq:
+        except error.ErrorFromMo:
             pass
 
-    def open_loop(self, glob: UqNamespace) -> UqVar:
+    def open_loop(self, glob: MoNamespace) -> MoVar:
         """Open-loop behaviour."""
         token = self.tokenizer.next()
         match t := token.type:
@@ -159,31 +159,31 @@ class UqParser:
                 pass
             case "NUM":
                 if "." in token.value:
-                    return UqVar("FLOAT", float(token.value))
-                return UqVar("INT", int(token.value))
+                    return MoVar("FLOAT", float(token.value))
+                return MoVar("INT", int(token.value))
             case _:
                 error.unexpected_token(token)
-        return UqVar.default()
+        return MoVar.default()
 
-    def force_type(self, var_type: "VarType", glob: UqNamespace) -> UqVar:
+    def force_type(self, var_type: "VarType", glob: MoNamespace) -> MoVar:
         """Compulsively transform the type."""
         var_name = self.tokenizer.expect("ID").value
         var = self.define_var(var_name, glob)
         return var.force_type(var_type)
 
-    def define_var(self, var_name: str, glob: UqNamespace) -> UqVar:
+    def define_var(self, var_name: str, glob: MoNamespace) -> MoVar:
         """Define variable."""
         while token := self.tokenizer.next():
             match token.type:
                 case "ID":
-                    var = UqVar.default()
+                    var = MoVar.default()
                     raise NotImplementedError()
                 case "ASSIGN":
                     var = self.open_loop(glob)
                     var.setname(var_name)
         return var
 
-    def eval_var(self, var: UqVar, glob: UqNamespace) -> UqVar:
+    def eval_var(self, var: MoVar, glob: MoNamespace) -> MoVar:
         """Evaluate variable."""
         if var.is_function():
             token = self.tokenizer.next()
@@ -202,19 +202,19 @@ class UqParser:
                 case "LSQUARE":
                     return var.getitem(self.in_squares(glob))
                 case "INT":
-                    return var.getitem(UqVar.from_token(token))
+                    return var.getitem(MoVar.from_token(token))
                 case _:
                     error.unexpected_token(token)
         return var
 
-    def in_parentheses(self, glob: UqNamespace) -> UqVar:
+    def in_parentheses(self, glob: MoNamespace) -> MoVar:
         """Evaluate variable in parentheses."""
         raise NotImplementedError()
 
-    def in_squares(self, glob: UqNamespace) -> UqVar:
+    def in_squares(self, glob: MoNamespace) -> MoVar:
         """Evaluate variable in square brackets."""
         raise NotImplementedError()
 
-    def in_braces(self, glob: UqNamespace) -> UqVar:
+    def in_braces(self, glob: MoNamespace) -> MoVar:
         """Evaluate variable in braces."""
         raise NotImplementedError()

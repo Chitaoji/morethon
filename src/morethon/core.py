@@ -6,6 +6,6 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
-__all__ = ["UqParser"]
+__all__ = ["MoParser"]
 
-from .grammar import UqParser
+from .grammar import MoParser
