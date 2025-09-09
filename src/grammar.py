@@ -78,8 +78,12 @@ class UqVar(NamedTuple):
             error.not_a_list(self)
         return self.value(arg)
 
+    def setname(self, name: str) -> None:
+        """Set name."""
+        self.name = name
 
-class UqNamespace:
+
+class UqNamespace(NamedTuple):
     """Defines namespaces in uquant language."""
 
     name: str
@@ -125,71 +129,59 @@ class UqParser:
 
     def exec(self, code: str) -> None:
         """Execute the code."""
+        self.tokenizer.parse_code(code)
+        glob = UqNamespace("main", {}, {})
         try:
-            lastvar = self.open_loop(code, UqNamespace("main", {}, {}))
+            lastvar = self.open_loop(glob)
             print(lastvar)
         except error.ErrorFromUq:
             pass
 
-    def open_loop(self, code: str, glob: UqNamespace) -> UqVar:
+    def open_loop(self, glob: UqNamespace) -> UqVar:
         """Open-loop behaviour."""
-        self.tokenizer.parse_code(code)
-        lastvar = UqVar.default()
-        varinline: bool = False
-        local = glob.new()
+        token = self.tokenizer.next()
+        match t := token.type:
+            case "ID" if token.value in glob:
+                return self.eval_var(glob[token.value], glob)
+            case "ID":
+                return self.define_var(token.value, glob)
+            case "LPAR":
+                return self.in_parentheses(glob)
+            case "LSQUARE":
+                raise NotImplementedError()
+            case "LBRACE":
+                return self.in_braces(glob)
+            case "STR" | "TYPE" | "FIELD" | "BOOL" | "INT" | "FLOAT" | "FACTOR":
+                return self.force_type(t, glob)
+            case "USING":
+                raise NotImplementedError()
+            case "COMMENT" | "NEWLINE":
+                pass
+            case "NUM":
+                if "." in token.value:
+                    return UqVar("FLOAT", float(token.value))
+                return UqVar("INT", int(token.value))
+            case _:
+                error.unexpected_token(token)
+        return UqVar.default()
 
-        while token := self.tokenizer.next():
-            match t := token.type:
-                case "ID":
-                    if varinline:
-                        error.unexpected_token(token)
-                    if token.value in local:
-                        lastvar = self.eval_var(local[token.value], local)
-                        varinline = True
-                    else:
-                        local[token.value] = lastvar = self.define_var(
-                            token.value, local
-                        )
-                        varinline = True
-                case "LPAR":
-                    lastvar = self.in_parentheses(local)
-                    varinline = True
-                case "LSQUARE":
-                    raise NotImplementedError()
-                case "LBRACE":
-                    lastvar = self.in_braces(local)
-                    varinline = True
-                case "STR" | "TYPE" | "FIELD" | "BOOL" | "INT" | "FLOAT" | "FACTOR":
-                    name, var = self.force_type(t, local)
-                    local[name] = lastvar = var
-                    varinline = True
-                case "USING":
-                    raise NotImplementedError()
-                case "COMMENT":
-                    continue
-                case "NEWLINE":
-                    varinline = False
-                case _:
-                    error.unexpected_token(token)
-        return lastvar
-
-    def force_type(self, var_type: "VarType", glob: UqNamespace) -> tuple[str, UqVar]:
+    def force_type(self, var_type: "VarType", glob: UqNamespace) -> UqVar:
         """Compulsively transform the type."""
         var_name = self.tokenizer.expect("ID").value
         var = self.define_var(var_name, glob)
-        return var_name, var.force_type(var_type)
+        return var.force_type(var_type)
 
     def define_var(self, var_name: str, glob: UqNamespace) -> UqVar:
         """Define variable."""
-        raise NotImplementedError()
-
-        local: dict[str, UqVar] = {}
         while token := self.tokenizer.next():
             match token.type:
                 case "ID":
-                    local[token.value] = UqVar.default()
-                case "ASSIGN":
+                    var = UqVar.default()
                     raise NotImplementedError()
+                case "ASSIGN":
+                    var = self.open_loop(glob)
+                    var.setname(var_name)
+        return var
 
     def eval_var(self, var: UqVar, glob: UqNamespace) -> UqVar:
         """Evaluate variable."""
