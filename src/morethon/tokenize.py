@@ -30,9 +30,9 @@ class MoToken(NamedTuple):
         return self.type != "NULL"
 
     @classmethod
-    def default(cls) -> Self:
-        """Return a default instance."""
-        return cls("NULL", "", 1, "")
+    def null(cls) -> Self:
+        """Return null token."""
+        return cls("NULL", "null", 1, "")
 
 
 class MoTokenizer:
@@ -79,7 +79,7 @@ class MoTokenizer:
             "False",
         }
         self.iter = iter(())
-        self.last_token = self.default_token = MoToken.default()
+        self.last_token = self.default_token = MoToken.null()
 
     def next(self) -> MoToken:
         """Return the next token if exists."""

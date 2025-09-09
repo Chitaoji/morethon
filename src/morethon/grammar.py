@@ -7,6 +7,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 """
 
 import re
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable, NamedTuple, Self
 
 from . import error
@@ -35,7 +36,8 @@ class MoFuncType(NamedTuple):
     returns: "VarType"
 
 
-class MoVar(NamedTuple):
+@dataclass
+class MoVar:
     """Defines variables in morethon language."""
 
     name: str
@@ -45,12 +47,17 @@ class MoVar(NamedTuple):
     @classmethod
     def from_token(cls, token: MoToken) -> Self:
         """Init from token."""
-        return cls("", token.type, token.value)
+        match token.type:
+            case "NUM":
+                if "." in token.value:
+                    return cls("default", "FLOAT", float(token.value))
+                return cls("default", "INT", int(token.value))
+        return cls("default", token.type, token.value)
 
     @classmethod
-    def default(cls) -> Self:
+    def null(cls) -> Self:
         """Return a default instance."""
-        return cls("", "NULL", None)
+        return cls("null", "NULL", None)
 
     def force_type(self, var_type: "VarType") -> Self:
         """Force to the type."""
@@ -155,15 +162,13 @@ class MoParser:
                 return self.force_type(t, glob)
             case "USING":
                 raise NotImplementedError()
-            case "COMMENT" | "NEWLINE":
+            case "COMMENT" | "NEWLINE" | "NULL":
                 pass
             case "NUM":
-                if "." in token.value:
-                    return MoVar("FLOAT", float(token.value))
-                return MoVar("INT", int(token.value))
+                return MoVar.from_token(token)
             case _:
                 error.unexpected_token(token)
-        return MoVar.default()
+        return MoVar.null()
 
     def force_type(self, var_type: "VarType", glob: MoNamespace) -> MoVar:
         """Compulsively transform the type."""
@@ -176,12 +181,14 @@ class MoParser:
         while token := self.tokenizer.next():
             match token.type:
                 case "ID":
-                    var = MoVar.default()
+                    var = MoVar.null()
                     raise NotImplementedError()
                 case "ASSIGN":
                     var = self.open_loop(glob)
                     var.setname(var_name)
-        return var
+                    return var
+                case "NULL":
+                    raise NotImplementedError()
 
     def eval_var(self, var: MoVar, glob: MoNamespace) -> MoVar:
         """Evaluate variable."""
