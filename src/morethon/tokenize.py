@@ -1,8 +1,8 @@
 """
-Contains a tokenizer for uquant language: tokenize(), etc.
+Contains a tokenizer for morethon language: tokenize(), etc.
 
 NOTE: this module is private. All functions and objects are available in the main
-`uquant` namespace - use that instead.
+`morethon` namespace - use that instead.
 
 """
 
@@ -19,7 +19,7 @@ __all__ = ["UqToken", "UqTokenizer"]
 
 
 class UqToken(NamedTuple):
-    """Token for uquant language."""
+    """Token for morethon language."""
 
     type: "TokenType"
     value: str

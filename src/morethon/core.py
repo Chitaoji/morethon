@@ -1,8 +1,8 @@
 """
-Contains the core of uquant: ... , etc.
+Contains the core of morethon: ... , etc.
 
 NOTE: this module is private. All functions and objects are available in the main
-`uquant` namespace - use that instead.
+`morethon` namespace - use that instead.
 
 """
 

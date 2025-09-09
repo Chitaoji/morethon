@@ -1,8 +1,8 @@
 """
-Processes the uquant abstract syntax grammar.
+Processes the morethon abstract syntax grammar.
 
 NOTE: this module is private. All functions and objects are available in the main
-`uquant` namespace - use that instead.
+`morethon` namespace - use that instead.
 
 """
 
@@ -29,14 +29,14 @@ class Field:
 
 
 class UqFuncType(NamedTuple):
-    """Defines function type in uquant language."""
+    """Defines function type in morethon language."""
 
     require: "VarType"
     returns: "VarType"
 
 
 class UqVar(NamedTuple):
-    """Defines variables in uquant language."""
+    """Defines variables in morethon language."""
 
     name: str
     type: "VarType"
@@ -84,7 +84,7 @@ class UqVar(NamedTuple):
 
 
 class UqNamespace(NamedTuple):
-    """Defines namespaces in uquant language."""
+    """Defines namespaces in morethon language."""
 
     name: str
     variables: dict[str, UqVar]
@@ -122,7 +122,7 @@ class UqNamespace(NamedTuple):
 
 
 class UqParser:
-    """Processor for uquant language."""
+    """Processor for morethon language."""
 
     def __init__(self) -> None:
         self.tokenizer = UqTokenizer()

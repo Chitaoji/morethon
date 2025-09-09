@@ -1,4 +1,4 @@
-"""Execute uquant."""
+"""Execute morethon."""
 
 import argparse
 from pathlib import Path
@@ -12,7 +12,7 @@ class StartAction(argparse.Action):
     def __call__(self, *args): ...
 
 
-parser = argparse.ArgumentParser(description="uquant")
+parser = argparse.ArgumentParser(description="morethon")
 parser.add_argument("file", nargs="?", help="read from script file")
 parser.add_argument(".", nargs=0, action=StartAction, help="read from std input")
 

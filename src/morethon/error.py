@@ -2,7 +2,7 @@
 Handles errors.
 
 NOTE: this module is private. All functions and objects are available in the main
-`uquant` namespace - use that instead.
+`morethon` namespace - use that instead.
 
 """
 
