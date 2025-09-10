@@ -6,13 +6,13 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
-__all__ = ["runfile"]
+__all__ = ["execfile"]
 
 from pathlib import Path
 
-from .grammar import MoParser
+from .grammar import MoInterpreter
 
 
-def runfile(filename: str) -> None:
-    """Read from script file and run the morethon interpreter."""
-    MoParser().exec(Path(filename).read_text("utf-8"))
+def execfile(filename: str) -> None:
+    """Execute a script file."""
+    MoInterpreter().exec(Path(filename).read_text("utf-8"))

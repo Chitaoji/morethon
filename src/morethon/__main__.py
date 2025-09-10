@@ -4,7 +4,7 @@ from pathlib import Path
 
 import click
 
-from .grammar import MoParser
+from .grammar import MoInterpreter
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
@@ -17,4 +17,4 @@ def run(filename: str) -> None:
     otherwise read from std input.
 
     """
-    MoParser().exec(Path(filename).read_text("utf-8"))
+    MoInterpreter().exec(Path(filename).read_text("utf-8"))

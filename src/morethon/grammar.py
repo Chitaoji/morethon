@@ -16,7 +16,7 @@ from .tokenize import MoToken, MoTokenizer
 if TYPE_CHECKING:
     from ._typing import VarType
 
-__all__ = ["MoParser"]
+__all__ = ["MoInterpreter"]
 
 
 class Field:
@@ -134,7 +134,7 @@ class MoNamespace(NamedTuple):
         return self.__class__(self.name, self.variables.copy(), self.namespaces)
 
 
-class MoParser:
+class MoInterpreter:
     """Processor for morethon language."""
 
     def __init__(self) -> None:
