@@ -40,6 +40,7 @@ class MoTokenizer:
 
     def __init__(self) -> None:
         self.token_spec = {
+            "STRING": r"\".*?\"",  # String
             "NUM": r"\d+(\.\d*)?",  # Integer or decimal numbers
             "DOUBLEARROW": r"=>",  # Double arrows
             "TYPEASSIGN": r":=",  # Type-assignment operators

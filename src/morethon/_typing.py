@@ -22,6 +22,7 @@ VarType = (
 TokenType = (
     VarType
     | Literal[
+        "STRING",
         "NUM",
         "DOUBLEARROW",
         "TYPEASSIGN",

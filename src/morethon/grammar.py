@@ -52,6 +52,12 @@ class MoVar:
                 if "." in token.value:
                     return cls("default", "FLOAT", float(token.value))
                 return cls("default", "INT", int(token.value))
+            case "STRING":
+                return cls("default", "STR", token.value[1:-1])
+            case "TRUE":
+                return cls("default", "BOOL", True)
+            case "FALSE":
+                return cls("default", "BOOL", False)
         return cls("default", token.type, token.value)
 
     @classmethod
@@ -164,7 +170,7 @@ class MoParser:
                 raise NotImplementedError()
             case "COMMENT" | "NEWLINE" | "NULL":
                 pass
-            case "NUM":
+            case "NUM" | "STRING" | "TRUE" | "FALSE":
                 return MoVar.from_token(token)
             case _:
                 error.unexpected_token(token)
