@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from .grammar import MoVar
     from .tokenize import MoToken
 
-__all__ = ["unexpected_token", "illegal_token", "mismatched_token"]
+__all__ = []
 
 
 def unexpected_token(token: "MoToken") -> None:
@@ -23,11 +23,6 @@ def unexpected_token(token: "MoToken") -> None:
 def illegal_token(token: "MoToken") -> None:
     """Raises MoError."""
     MoSyntaxError(f"illegal token {token.value!r} on line {token.lineno}").err()
-
-
-def mismatched_token(token: "MoToken", token_value: str) -> None:
-    """Raises MoError."""
-    MoSyntaxError(f"mismatched token {token_value!r} on line {token.lineno}").err()
 
 
 def is_not_type(var: "MoVar", var_type: str) -> None:

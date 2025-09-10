@@ -50,19 +50,19 @@ class MoVar:
         match token.type:
             case "NUM":
                 if "." in token.value:
-                    return cls("default", "FLOAT", float(token.value))
-                return cls("default", "INT", int(token.value))
+                    return cls("unspecified", "FLOAT", float(token.value))
+                return cls("unspecified", "INT", int(token.value))
             case "STRING":
-                return cls("default", "STR", token.value[1:-1])
+                return cls("unspecified", "STR", token.value[1:-1])
             case "TRUE":
-                return cls("default", "BOOL", True)
+                return cls("unspecified", "BOOL", True)
             case "FALSE":
-                return cls("default", "BOOL", False)
-        return cls("default", token.type, token.value)
+                return cls("unspecified", "BOOL", False)
+        return cls("unspecified", token.type, token.value)
 
     @classmethod
     def null(cls) -> Self:
-        """Return a default instance."""
+        """Return a null instance."""
         return cls("null", "NULL", None)
 
     def force_type(self, var_type: "VarType") -> Self:
@@ -187,14 +187,14 @@ class MoParser:
         while token := self.tokenizer.next():
             match token.type:
                 case "ID":
-                    var = MoVar.null()
                     raise NotImplementedError()
                 case "ASSIGN":
                     var = self.open_loop(glob)
                     var.setname(var_name)
                     return var
-                case "NULL":
-                    raise NotImplementedError()
+                case _:
+                    error.unexpected_token(token)
+        error.not_defined(var_name)
 
     def eval_var(self, var: MoVar, glob: MoNamespace) -> MoVar:
         """Evaluate variable."""

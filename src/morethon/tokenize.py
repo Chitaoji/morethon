@@ -91,14 +91,14 @@ class MoTokenizer:
         """Return the next token if is of token_type."""
         self.last_token = next(self.iter, self.default_token)
         if self.last_token.type != token_type:
-            error.mismatched_token(self.last_token, self.token_spec[token_type])
+            error.unexpected_token(self.last_token)
         return self.last_token
 
     def consume(self, token_type: "TokenType") -> None:
         """Consume a token of token_type if exists."""
         self.last_token = next(self.iter, self.default_token)
         if self.last_token.type != token_type:
-            error.mismatched_token(self.last_token, self.token_spec[token_type])
+            error.unexpected_token(self.last_token)
 
     def parse_code(self, code: str) -> None:
         """Parse the code."""
