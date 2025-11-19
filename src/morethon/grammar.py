@@ -19,21 +19,30 @@ if TYPE_CHECKING:
 __all__ = ["MoInterpreter"]
 
 
-class Field:
-    """Morethon field."""
-
-    def __init__(self, *args):
-        pass
-
-    def record_as_factor(self) -> None:
-        """Factor."""
-
-
-class MoFuncType(NamedTuple):
+class MoDefinedType(NamedTuple):
     """Defines function type in morethon language."""
 
-    require: "VarType"
-    returns: "VarType"
+    require_type: "VarType" | Self | None
+    return_type: "VarType" | Self
+
+    def __eq__(self, value: Self, /) -> bool:
+        if not isinstance(value, self.__class__):
+            return False
+        return (
+            self.require_type == value.require_type
+            and self.return_type == value.return_type
+        )
+
+
+class MoFunc(NamedTuple):
+    """Defines function in morethon language."""
+
+    functype: MoDefinedType
+    function: Callable[["MoVar"], "MoVar"]
+
+    def eval(self, arg: "MoVar") -> "MoVar":
+        """Evaluate."""
+        return self.function(arg.force_type(self.functype))
 
 
 @dataclass
@@ -42,7 +51,7 @@ class MoVar:
 
     name: str
     type: "VarType"
-    value: Callable[[Self], Self] | Field | str | int | float | bool | None
+    value: MoFunc | str | int | float | bool | None
 
     @classmethod
     def from_token(cls, token: MoToken) -> Self:
@@ -65,31 +74,37 @@ class MoVar:
         """Return a null instance."""
         return cls("null", "NULL", None)
 
-    def force_type(self, var_type: "VarType") -> Self:
+    def force_type(self, var_type: "VarType" | MoDefinedType) -> Self:
         """Force to the type."""
-        if (self.type == var_type) or (self.is_function() and var_type == "FUNCTION"):
-            return self
-        error.is_not_type(self, var_type)
+        if isinstance(var_type, MoDefinedType):
+            if var_type.require_type is None and self.type == var_type.return_type:
+                return self
+            if self.type == "FUNCTION" and self.value.functype == var_type:
+                return self
+            error.is_not_type(self, var_type)
+        if not self.type == var_type:
+            error.is_not_type(self, var_type)
+        return self
 
     def is_function(self) -> bool:
         """Is self a function."""
-        return isinstance(self.type, MoFuncType)
+        return self.type == "FUNCTION"
 
     def is_list(self) -> bool:
         """Is self a list."""
         return self.type == "LIST"
 
     def eval(self, arg: Self) -> Self:
-        """Get value if is function."""
+        """Evaluate if is function."""
         if not self.is_function():
             error.not_a_function(self)
-        return self.value(arg)
+        return self.value.eval(arg)
 
     def getitem(self, arg: Self) -> Self:
         """Get item if is list."""
         if not self.is_list():
             error.not_a_list(self)
-        return self.value(arg)
+        return self.value.eval(arg)
 
     def setname(self, name: str) -> None:
         """Set name."""
@@ -150,24 +165,26 @@ class MoInterpreter:
         except error.ErrorFromMo:
             pass
 
-    def open_loop(self, glob: MoNamespace) -> MoVar:
+    def open_loop(self, glob: MoNamespace, inline: bool = False) -> MoVar:
         """Open-loop behaviour."""
         token = self.tokenizer.next()
         match t := token.type:
             case "ID" if token.value in glob:
                 return self.eval_var(glob[token.value], glob)
             case "ID":
+                if inline:
+                    error.not_defined(token.value)
                 return self.define_var(token.value, glob)
             case "LPAR":
                 return self.in_parentheses(glob)
             case "LSQUARE":
-                raise NotImplementedError()
+                raise NotImplementedError(5)
             case "LBRACE":
                 return self.in_braces(glob)
             case "STR" | "TYPE" | "FIELD" | "BOOL" | "INT" | "FLOAT" | "FACTOR":
                 return self.force_type(t, glob)
             case "USING":
-                raise NotImplementedError()
+                raise NotImplementedError(6)
             case "COMMENT" | "NEWLINE" | "NULL":
                 pass
             case "NUM" | "STRING" | "TRUE" | "FALSE":
@@ -187,11 +204,13 @@ class MoInterpreter:
         while token := self.tokenizer.next():
             match token.type:
                 case "ID":
-                    raise NotImplementedError()
+                    raise NotImplementedError(1)
                 case "ASSIGN":
-                    var = self.open_loop(glob)
+                    var = self.open_loop(glob, inline=True)
                     var.setname(var_name)
                     return var
+                case "NEWLINE":
+                    break
                 case _:
                     error.unexpected_token(token)
         error.not_defined(var_name)
@@ -222,12 +241,12 @@ class MoInterpreter:
 
     def in_parentheses(self, glob: MoNamespace) -> MoVar:
         """Evaluate variable in parentheses."""
-        raise NotImplementedError()
+        raise NotImplementedError(2)
 
     def in_squares(self, glob: MoNamespace) -> MoVar:
         """Evaluate variable in square brackets."""
-        raise NotImplementedError()
+        raise NotImplementedError(3)
 
     def in_braces(self, glob: MoNamespace) -> MoVar:
         """Evaluate variable in braces."""
-        raise NotImplementedError()
+        raise NotImplementedError(4)

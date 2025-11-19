@@ -9,16 +9,19 @@ from typing import Literal
 
 import loggings
 
-from .grammar import MoFuncType
-
 loggings.warning("this module is not intended to be imported at runtime")
 
-VarType = (
-    Literal[
-        "FUNCTION", "STR", "TYPE", "FIELD", "FACTOR", "INT", "FLOAT", "BOOL", "LIST"
-    ]
-    | MoFuncType
-)
+VarType = Literal[
+    "FUNCTION",
+    "STR",
+    "TYPE",
+    "NUM",
+    "INT",
+    "FLOAT",
+    "BOOL",
+    "LIST",
+    "NULL",
+]
 TokenType = (
     VarType
     | Literal[
