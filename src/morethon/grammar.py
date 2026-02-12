@@ -74,7 +74,7 @@ class MoVar:
         """Return a null instance."""
         return cls("null", "NULL", None)
 
-    def force_type(self, var_type: "VarType" | MoDefinedType) -> Self:
+    def force_type(self, var_type: "VarType | MoDefinedType") -> Self:
         """Force to the type."""
         if isinstance(var_type, MoDefinedType):
             if var_type.require_type is None and self.type == var_type.return_type:
