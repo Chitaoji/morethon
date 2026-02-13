@@ -31,11 +31,11 @@ using snaps tools
 # 单行注释以 # 开头
 
 # 3) 字面量
-i = 1            # NUM -> INT
-f = 2.5          # NUM -> FLOAT
+i = 1            # INT
+f = 2.5          # FLOAT
 t = True         # BOOL
 u = False        # BOOL
-s = "hello"      # STRING -> STR
+s = "hello"      # STR
 
 # 4) 显式类型约束（强制类型）
 int i2 = 10
@@ -74,7 +74,11 @@ id x = x
 v3 = id i
 v4 = id "ok"
 v5 = id (1 + 2)
-v6 = id { a = 1\n b = a + 1\n b }
+v6 = id { 
+     a = 1
+     b = a + 1
+     b 
+}
 v7 = id [7, 8, 9]
 
 # 10) 大括号块（局部作用域，返回块内最后一个值）
