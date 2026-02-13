@@ -1,65 +1,108 @@
 # morethon
-Interpreter for morethon language.
 
-## Installation
-```sh
-$ pip install morethon
+`morethon` 是一个实验性的脚本语言解释器（Python 实现）。
+
+## 安装
+
+```bash
+pip install morethon
 ```
 
-## Requirements
-```txt
-click
+## 命令行用法
+
+```bash
+# 执行脚本
+mo examples/test.mo
 ```
-### Usage
-```py
-mo # 激活morethon环境
-```
-### Morethon语法定义
+
+> 当前实现会输出“最后一个表达式/变量”的值。
+
+---
+
+## 当前版本语法（按解释器实现）
+
+下面是**当前可用语法**的完整示例集合（可直接作为参考模板）：
+
 ```mo
-require snaps # 引用模块
-snaps::open # 用::调用模块中的变量
+# 1) using 语句（当前会被解析并消费，但不导入外部模块能力）
+using snaps tools
 
-using snaps # 直接引用模块内全部变量
+# 2) 注释
+# 单行注释以 # 开头
 
-# 变量不可变，不可重复声明
-# 变量名可以包含字母、数字、下划线（_）、点（.），必须以字母或下划线开头
+# 3) 字面量
+i = 1            # NUM -> INT
+f = 2.5          # NUM -> FLOAT
+t = True         # BOOL
+u = False        # BOOL
+s = "hello"      # STRING -> STR
 
-# 类型自动推导
-avg = （1.0 + 2.0 + 4.0） / 2 # float
-mid = 2 # int
+# 4) 显式类型约束（强制类型）
+int i2 = 10
+float f2 = 3
+bool b2 = False
+str s2 = "morethon"
 
-# 强制类型转换
-int a = 1.0 # int
-float b = 1 # float
+# 5) 表达式与运算符（左结合）
+add = 1 + 2
+sub = 7 - 3
+mul = 2 * 4
+div = 7 / 2
+pow = 2 ^ 3
+mix = (1 + 2) * (3 + 4)
 
-# 类型：
-# int, float, bool, num, str
-# num 包含 float, int两类，int包含 bool
-# a & b 为类型的最小父集，如 int & int is int，int & float is num, num & int is num
+# 6) 列表
+empty = []
+arr = [1, 2, 3]
+nested = [1, [2, 3], 4]
 
+# 7) 列表索引
+x = arr[0]
+y = nested[1][0]
 
-# 定义函数类型（没有实际作用，相当于注释）
-abs x := (num a) => a -> a 
+# 8) 函数定义（柯里化）
+# 单参数函数
+inc x = x + 1
+v1 = inc 41
 
-# 定义函数
-power: x, y = x ^ y # (num a, b) => a -> b -> a & b 
-unsigned: f = {
-     g: x, y = f(abs(x), y)
-     g
-} ＃ (num a, b, c) => (a -> b -> c) -> (a -> b -> c)
-c = unsigned power a b
+# 多参数函数（实质是连续单参数调用）
+power x y = x ^ y
+v2 = power 2 5
 
+# 9) 函数实参可为：变量 / 字面量 / 括号表达式 / 大括号块 / 列表
+id x = x
+v3 = id i
+v4 = id "ok"
+v5 = id (1 + 2)
+v6 = id { a = 1\n b = a + 1\n b }
+v7 = id [7, 8, 9]
+
+# 10) 大括号块（局部作用域，返回块内最后一个值）
+blk = {
+  a = 10
+  b = a + 2
+  b
+}
+
+# 11) 组合示例
+final = power (inc 2) 3
 ```
-## See Also
-### Github repository
-* https://github.com/Chitaoji/morethon/
 
-### PyPI project
-* https://pypi.org/project/morethon/
+---
+
+## 语法说明（实现细节）
+
+- 变量不可重复定义（同一作用域内二次赋值会报错）。
+- 函数调用使用空格分隔参数，例如 `power 2 3`。
+- 列表索引支持链式形式，例如 `nested[1][0]`。
+- 支持的算术运算符：`+ - * / ^`。
+- 当前仓库中的 `using` 语句仅语法上可通过，尚未实现真实模块导入行为。
+
+## 项目地址
+
+- GitHub: https://github.com/Chitaoji/morethon/
+- PyPI: https://pypi.org/project/morethon/
 
 ## License
-This project falls under the BSD 3-Clause License.
 
-## History
-### v0.0.0
-* Initial release.
+BSD 3-Clause License.
