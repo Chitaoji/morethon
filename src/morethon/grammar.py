@@ -126,7 +126,7 @@ class MoNamespace(NamedTuple):
         return sp in self.namespaces and name in self.namespaces[sp]
 
     def __getitem__(self, key: str, /) -> MoVar:
-        if not key in self:
+        if key not in self:
             error.not_defined(key)
         splited = re.split(r"::", key, maxsplit=1)
         if len(splited) == 1:
