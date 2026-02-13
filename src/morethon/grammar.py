@@ -183,7 +183,9 @@ class MoInterpreter:
         token = self.tokenizer.next()
         return self.open_from_token(token, glob, inline)
 
-    def open_from_token(self, token: MoToken, glob: MoNamespace, inline: bool = False) -> MoVar:
+    def open_from_token(
+        self, token: MoToken, glob: MoNamespace, inline: bool = False
+    ) -> MoVar:
         """Open-loop behaviour from current token."""
         match t := token.type:
             case "ID" if token.value in glob:
@@ -240,7 +242,9 @@ class MoInterpreter:
                         )
                     else:
                         var = self.open_loop(glob, inline=True)
-                        var = self.eval_expression(var, glob, {"NEWLINE", "RPAR", "RSQUARE", "RBRACE"})
+                        var = self.eval_expression(
+                            var, glob, {"NEWLINE", "RPAR", "RSQUARE", "RBRACE"}
+                        )
                     var.setname(var_name)
                     glob.variables[var_name] = var
                     return var
@@ -250,7 +254,9 @@ class MoInterpreter:
                     error.unexpected_token(token)
         error.not_defined(var_name)
 
-    def _make_function(self, var_name: str, params: list[str], glob: MoNamespace) -> MoFunc:
+    def _make_function(
+        self, var_name: str, params: list[str], glob: MoNamespace
+    ) -> MoFunc:
         """Build a curried function from parameters."""
         body = self.read_expr_tokens_until("NEWLINE")
 
@@ -261,12 +267,14 @@ class MoInterpreter:
                 local_given = given | {param: arg}
                 if index < len(params) - 1:
                     return MoVar(
-                        f"{var_name}<{index+1}>",
+                        f"{var_name}<{index + 1}>",
                         "FUNCTION",
                         build_layer(index + 1, local_given),
                     )
 
-                local = MoNamespace(var_name, glob.variables | local_given, glob.namespaces)
+                local = MoNamespace(
+                    var_name, glob.variables | local_given, glob.namespaces
+                )
                 old_tokenizer = self.tokenizer
                 try:
                     self.tokenizer = MoTokenizer()
@@ -292,7 +300,9 @@ class MoInterpreter:
                 case "LBRACE":
                     return self.eval_var(var.eval(self.in_braces(glob)), glob)
                 case "NUM" | "STRING" | "TRUE" | "FALSE" | "LSQUARE":
-                    return self.eval_var(var.eval(self.open_from_token(token, glob, inline=True)), glob)
+                    return self.eval_var(
+                        var.eval(self.open_from_token(token, glob, inline=True)), glob
+                    )
                 case _:
                     error.unexpected_token(token)
         elif var.is_list():
@@ -325,8 +335,16 @@ class MoInterpreter:
             "BOOL",
         }:
             error.unexpected_token(MoToken("OP", op, 1, ""))
-        lvalue = float(left.value) if left.type == "FLOAT" or right.type == "FLOAT" else int(left.value)
-        rvalue = float(right.value) if left.type == "FLOAT" or right.type == "FLOAT" else int(right.value)
+        lvalue = (
+            float(left.value)
+            if left.type == "FLOAT" or right.type == "FLOAT"
+            else int(left.value)
+        )
+        rvalue = (
+            float(right.value)
+            if left.type == "FLOAT" or right.type == "FLOAT"
+            else int(right.value)
+        )
         match op:
             case "+":
                 value = lvalue + rvalue
@@ -340,7 +358,11 @@ class MoInterpreter:
                 value = lvalue**rvalue
             case _:
                 error.unexpected_token(MoToken("OP", op, 1, ""))
-        if isinstance(value, float) and value.is_integer() and left.type == right.type == "INT":
+        if (
+            isinstance(value, float)
+            and value.is_integer()
+            and left.type == right.type == "INT"
+        ):
             return MoVar("unspecified", "INT", int(value))
         if isinstance(value, float) and not value.is_integer() or "/" == op:
             return MoVar("unspecified", "FLOAT", float(value))
@@ -371,7 +393,6 @@ class MoInterpreter:
         if self.tokenizer.last_token.type != "RPAR":
             error.unexpected_token(self.tokenizer.last_token)
         return value
-
 
     def in_index(self, glob: MoNamespace) -> MoVar:
         """Evaluate list index in square brackets."""
